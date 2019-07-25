@@ -1,8 +1,8 @@
 platform :ios, '9.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-target 'library' do
-  # Pods for library
+target 'lib' do
+  # Pods for lib
   pod 'React', :path => '../node_modules/react-native/'
   pod 'React-Core', :path => '../node_modules/react-native/React'
   pod 'React-DevSupport', :path => '../node_modules/react-native/React'
@@ -28,7 +28,7 @@ target 'library' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  target 'libraryTests' do
+  target 'libTests' do
     inherit! :search_paths
     # Pods for testing
   end
@@ -36,10 +36,10 @@ target 'library' do
   use_native_modules!
 end
 
-target 'library-tvOS' do
-  # Pods for library-tvOS
+target 'lib-tvOS' do
+  # Pods for lib-tvOS
 
-  target 'library-tvOSTests' do
+  target 'lib-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end
