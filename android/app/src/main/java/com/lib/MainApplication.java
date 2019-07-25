@@ -1,4 +1,4 @@
-package com.library;
+package com.lib;
 
 import android.app.Application;
 import android.util.Log;
