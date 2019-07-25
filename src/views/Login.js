@@ -6,7 +6,6 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Icon,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 
@@ -29,7 +28,7 @@ export default class Login extends Component {
               />
 
               <TextInput
-                style={{ flex: 1 }}
+                style={styles.textInput}
                 placeholder="Username"
                 underlineColorAndroid="transparent"
               />
@@ -41,13 +40,15 @@ export default class Login extends Component {
               />
 
               <TextInput
-                style={{ flex: 1 }}
+                style={styles.textInput}
                 placeholder="Password"
                 underlineColorAndroid="transparent"
               />
             </View>
             <TouchableOpacity
-              onPress={this._onPressButton}
+              onPress={() => {
+                alert('dssdf');
+              }}
               style={GlobalStyles.button}
             >
               <View>
@@ -66,8 +67,12 @@ const styles = StyleSheet.create({
     flex: 0.6,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: 'pink',
   },
+
+  textInput: {
+    flex: 1,
+  },
+
   inputContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -78,6 +83,7 @@ const styles = StyleSheet.create({
     height: 40,
     margin: 10,
   },
+
   inputIcon: {
     padding: 10,
     margin: 5,

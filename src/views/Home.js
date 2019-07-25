@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  Icon,
-} from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 
 export default class Home extends Component {
@@ -22,7 +14,6 @@ export default class Home extends Component {
             />
           </View>
           <View style={styles.formContainer}>
-            
             <View>
               <Text style={GlobalStyles.largeText}>Books Organizer</Text>
             </View>
@@ -32,10 +23,10 @@ export default class Home extends Component {
               style={GlobalStyles.button}
             >
               <View>
-                <Text style={GlobalStyles.buttonText}>SCAN A BOOK</Text>
+                <Text style={GlobalStyles.buttonText}>SCAN A BOOKs</Text>
               </View>
             </TouchableOpacity>
-            <View style={GlobalStyles.verticalSpace}></View>
+            <View style={GlobalStyles.verticalSpace} />
             <TouchableOpacity
               onPress={this._onPressButton}
               style={GlobalStyles.button}
@@ -57,5 +48,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
 });
