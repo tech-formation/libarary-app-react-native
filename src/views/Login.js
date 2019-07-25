@@ -8,9 +8,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
+import { createStackNavigator, createAppContainer } from 'react-navigation';
+import Home from './Home';
 
-export default class Login extends Component {
+class Login extends Component {
+  static navigationOptions = { header: null };
+  
   render() {
+    const { navigate } = this.props.navigation;
     return (
       <View style={GlobalStyles.mainContainer}>
         <View style={GlobalStyles.contentContainer}>
@@ -46,9 +51,7 @@ export default class Login extends Component {
               />
             </View>
             <TouchableOpacity
-              onPress={() => {
-                alert('dssdf');
-              }}
+              onPress={() => navigate('Home')}
               style={GlobalStyles.button}
             >
               <View>
@@ -93,3 +96,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+const MainNavigator = createStackNavigator({
+  Login: { screen: Login },
+  Home: { screen: Home },
+});
+
+const App = createAppContainer(MainNavigator);
+
+export default App;

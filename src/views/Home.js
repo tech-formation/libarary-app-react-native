@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 
 export default class Home extends Component {
+  static navigationOptions = { header: null };
+
   render() {
     return (
       <View style={GlobalStyles.mainContainer}>
