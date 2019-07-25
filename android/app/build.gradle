@@ -128,7 +128,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.lib"
+        applicationId "com.library"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

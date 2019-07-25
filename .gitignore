@@ -24,6 +24,7 @@ project.xcworkspace
 
 # Android/IntelliJ
 #
+build/
 .idea
 .gradle
 local.properties
@@ -56,4 +57,3 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
-*.lock
