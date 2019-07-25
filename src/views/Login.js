@@ -8,16 +8,17 @@ import {
   TouchableOpacity,
   Icon,
 } from 'react-native';
+import GlobalStyles from '../assets/styles/StyleSheet';
 
 export default class Login extends Component {
   render() {
     return (
-      <View style={styles.mainContainer}>
-        <View style={styles.contentContainer}>
-          <View style={styles.logoContainer}>
+      <View style={GlobalStyles.mainContainer}>
+        <View style={GlobalStyles.contentContainer}>
+          <View style={GlobalStyles.logoContainer}>
             <Image
               source={require('../assets/images/logo.png')}
-              style={styles.logoImage}
+              style={GlobalStyles.logoImage}
             />
           </View>
           <View style={styles.formContainer}>
@@ -47,10 +48,10 @@ export default class Login extends Component {
             </View>
             <TouchableOpacity
               onPress={this._onPressButton}
-              style={styles.loginButton}
+              style={GlobalStyles.button}
             >
               <View>
-                <Text style={styles.loginText}>LOGIN</Text>
+                <Text style={GlobalStyles.buttonText}>LOGIN</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -61,25 +62,6 @@ export default class Login extends Component {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  contentContainer: {
-    width: 300,
-    height: 400,
-  },
-  logoContainer: {
-    flex: 0.4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoImage: {
-    width: 100,
-    height: 100,
-  },
   formContainer: {
     flex: 0.6,
     justifyContent: 'center',
@@ -104,17 +86,4 @@ const styles = StyleSheet.create({
     resizeMode: 'stretch',
     alignItems: 'center',
   },
-  loginButton: {
-    // flex: 0.3,
-    backgroundColor: '#8c1d1a',
-    width: 200,
-    height: 40,
-    top: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 5
-  },
-  loginText: {
-      color: '#fff',
-  }
 });
