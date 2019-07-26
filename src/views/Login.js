@@ -10,12 +10,15 @@ import {
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 import Home from './Home';
+import ScanShelf from './ScanShelf';
 
 class Login extends Component {
   static navigationOptions = { header: null };
-  
+
   render() {
-    const { navigate } = this.props.navigation;
+    const {
+      navigation: { navigate },
+    } = this.props;
     return (
       <View style={GlobalStyles.mainContainer}>
         <View style={GlobalStyles.contentContainer}>
@@ -26,26 +29,26 @@ class Login extends Component {
             />
           </View>
           <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
+            <View style={GlobalStyles.inputContainer}>
               <Image
-                source={require('../assets/images/ico-email.png')} //Change your icon image here
-                style={styles.inputIcon}
+                source={require('../assets/images/ico-email.png')}
+                style={GlobalStyles.inputIcon}
               />
 
               <TextInput
-                style={styles.textInput}
+                style={GlobalStyles.textInput}
                 placeholder="Username"
                 underlineColorAndroid="transparent"
               />
             </View>
-            <View style={styles.inputContainer}>
+            <View style={GlobalStyles.inputContainer}>
               <Image
-                source={require('../assets/images/ico-password.png')} //Change your icon image here
-                style={styles.inputIcon}
+                source={require('../assets/images/ico-password.png')}
+                style={GlobalStyles.inputIcon}
               />
 
               <TextInput
-                style={styles.textInput}
+                style={GlobalStyles.textInput}
                 placeholder="Password"
                 underlineColorAndroid="transparent"
               />
@@ -71,36 +74,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  textInput: {
-    flex: 1,
-  },
-
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#a9a9a9',
-    height: 40,
-    margin: 10,
-  },
-
-  inputIcon: {
-    padding: 10,
-    margin: 5,
-    height: 25,
-    width: 25,
-    resizeMode: 'stretch',
-    alignItems: 'center',
-  },
 });
 
-const MainNavigator = createStackNavigator({
-  Login: { screen: Login },
-  Home: { screen: Home },
-});
+const MainNavigator = createStackNavigator(
+  {
+    Login: { screen: Login },
+    Home: { screen: Home },
+    ScanShelf: { screen: ScanShelf },
+  },
+  {
+    initialRouteName: 'Home',
+    defaultNavigationOptions: {
+      headerStyle: {
+        backgroundColor: '#8c1d1a',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  }
+);
 
 const App = createAppContainer(MainNavigator);
 

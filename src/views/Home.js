@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+
 import GlobalStyles from '../assets/styles/StyleSheet';
 
 export default class Home extends Component {
-  static navigationOptions = { header: null };
+  static navigationOptions = { header: null, headerBackTitle: 'Scan Shelf' };
 
   render() {
+    const {
+      navigation: { navigate },
+    } = this.props;
+
     return (
       <View style={GlobalStyles.mainContainer}>
         <View style={GlobalStyles.contentContainer}>
@@ -30,7 +35,7 @@ export default class Home extends Component {
             </TouchableOpacity>
             <View style={GlobalStyles.verticalSpace} />
             <TouchableOpacity
-              onPress={this._onPressButton}
+              onPress={() => navigate('ScanShelf')}
               style={GlobalStyles.button}
             >
               <View>
