@@ -57,9 +57,14 @@ buck-out/
 # CocoaPods
 /ios/Pods/
 *.lock
+
 /android/app/src/main/assets/fonts/
 *.gradle
 *.pbxproj
 /ios/Podfile
 /package-lock.json
 *.plist
+
+/ios/library.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+/ios/library.xcodeproj/project.pbxproj
+
