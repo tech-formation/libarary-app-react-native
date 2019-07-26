@@ -25,7 +25,7 @@ export default class Home extends Component {
               style={GlobalStyles.button}
             >
               <View>
-                <Text style={GlobalStyles.buttonText}>SCAN A BOOKs</Text>
+                <Text style={GlobalStyles.buttonText}>SCAN A BOOK</Text>
               </View>
             </TouchableOpacity>
             <View style={GlobalStyles.verticalSpace} />
