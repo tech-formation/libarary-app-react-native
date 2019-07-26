@@ -57,3 +57,5 @@ buck-out/
 # CocoaPods
 /ios/Pods/
 *.lock
+/ios/library.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+/ios/library.xcodeproj/project.pbxproj
