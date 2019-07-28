@@ -15,6 +15,7 @@ import ScanShelf from './ScanShelf';
 import { LOGIN_API_URL } from '../configs/constants';
 import { httpPost } from '../utils/http';
 import AsyncStorage from '@react-native-community/async-storage';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 // To see all the requests in the chrome Dev tools in the network tab.
 XMLHttpRequest = GLOBAL.originalXMLHttpRequest
@@ -39,6 +40,7 @@ class Login extends Component {
   state = {
     username: '',
     password: '',
+    loading: false,
   };
 
   saveLoggedInUserInfo = async (token, user) => {
@@ -60,23 +62,27 @@ class Login extends Component {
     }
 
     const params = { username, password };
-
+    this.setState({ loading: true });
     httpPost(LOGIN_API_URL, params)
       .then(res => {
         const { navigate } = this.props.navigation;
         this.saveLoggedInUserInfo(res.token, res.user);
         navigate('Home');
+        this.setState({ loading: false });
       })
       .catch(err => {
-        Alert.alert(err.error);
+        this.setState({ loading: false });
+        setTimeout(() => Alert.alert(err.error), 100);
       });
   };
 
   render() {
-    const { username, password } = this.state;
+    const { username, password, loading } = this.state;
 
     return (
       <View style={GlobalStyles.mainContainer}>
+        <Spinner visible={loading} color="#8c1d1a" />
+
         <View style={GlobalStyles.contentContainer}>
           <View style={GlobalStyles.logoContainer}>
             <Image
@@ -174,7 +180,7 @@ const MainNavigator = createStackNavigator(
     ScanShelf: { screen: ScanShelf },
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'Login',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',
