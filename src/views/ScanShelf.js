@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Dimensions,
   Button,
-  Alert,
   FlatList,
 } from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
