@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
+import { Icon } from 'react-native-elements';
 
 export default class Scan extends Component {
   state = {
@@ -25,6 +26,9 @@ export default class Scan extends Component {
           <View>
             <Text style={GlobalStyles.buttonText}>Scan a Book</Text>
           </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={this._onPressButton}>
+          <Icon name="more-vert" color="#fff" />
         </TouchableOpacity>
       </View>
     ),
@@ -65,12 +69,15 @@ export default class Scan extends Component {
               this.setState({ shelf_no: value });
             }}
           />
-          <Button
+          <TouchableOpacity onPress={() => this.scanShelf()}>
+            <Icon name="send" color="#8c1d1a" />
+          </TouchableOpacity>
+          {/* <Button
             onPress={() => this.scanShelf()}
             title="Scan"
             color="#841584"
             accessibilityLabel="Learn more about this purple button"
-          />
+          /> */}
         </View>
       </View>
     );

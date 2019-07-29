@@ -32,7 +32,7 @@ export default class Home extends Component {
             </TouchableOpacity>
             <View style={GlobalStyles.verticalSpace} />
             <TouchableOpacity
-              onPress={() => navigate('ScanShelf')}
+              onPress={() => navigate('Scan')}
               style={GlobalStyles.button}
             >
               <View>
