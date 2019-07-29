@@ -6,23 +6,30 @@ import {
   TextInput,
   StyleSheet,
   Dimensions,
-  FlatList,
+  Alert,
 } from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { httpGet } from '../utils/http';
-import { SCAN_SHELF_URL, TEMP_TOKEN } from '../configs/constants';
+import {
+  SCAN_SHELF_URL,
+  TEMP_TOKEN,
+  FETCH_BOOK_URL,
+} from '../configs/constants';
 import { Icon } from 'react-native-elements';
+import ListItem from '../components/ListItem';
 
 class ScanShelf extends Component {
   state = {
-    shelf_no: '',
-    shelf_data: [],
+    book_no: '',
+    missing: [],
+    actual: [],
+    extra: [],
     index: 0,
     routes: [
-      { key: 'first', title: 'Actual (0/0)' },
-      { key: 'second', title: 'Extra (0)' },
-      { key: 'third', title: 'Missing (0)' },
+      { key: 'actual', title: 'Actual (0/0)' },
+      { key: 'extra', title: 'Extra (0)' },
+      { key: 'missing', title: 'Missing (0)' },
     ],
   };
 
@@ -43,16 +50,66 @@ class ScanShelf extends Component {
 
   componentDidMount() {
     const { navigation } = this.props;
-    const shelf_no = navigation.getParam('shelf_no', '2');
-    this.scanShelf(shelf_no);
+    const book_no = navigation.getParam('book_no', '2');
+    this.scanShelf(book_no);
   }
+
+  /**
+   * Scan Book & Adjust the Tabs
+   */
+  scanBook = book_id => {
+    if (!book_id) Alert.alert('Please enter Book Number to scan');
+
+    const { missing, actual, extra } = this.state;
+
+    const scanned = missing.find(book => {
+      return book.book_id == book_id;
+    });
+
+    if (scanned) {
+      const missing_copy = [...missing];
+      missing_copy.splice(missing.indexOf(scanned), 1);
+
+      const actual_copy = [...actual];
+      actual_copy.push(scanned);
+
+      this.setState({ missing: missing_copy, actual: actual_copy });
+
+      setTimeout(() => {
+        this.updateTabs();
+      }, 100);
+    } else {
+      let url = FETCH_BOOK_URL;
+      url = url.replace(/#ID#/g, book_id);
+
+      httpGet(url, {
+        headers: {
+          Authorization: `Bearer ${TEMP_TOKEN}`,
+        },
+      })
+        .then(res => {
+          const { data } = res;
+          const extra_copy = [...extra];
+          extra_copy.push(data);
+
+          this.setState({ extra: extra_copy });
+
+          setTimeout(() => {
+            this.updateTabs();
+          }, 100);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  };
 
   /**
    * Scan Shelf
    */
-  scanShelf = shelf_no => {
+  scanShelf = book_no => {
     let url = SCAN_SHELF_URL;
-    url = url.replace(/#ID#/g, shelf_no);
+    url = url.replace(/#ID#/g, book_no);
 
     httpGet(url, {
       headers: {
@@ -66,7 +123,8 @@ class ScanShelf extends Component {
           },
         } = res;
 
-        this.setState({ shelf_data: data });
+        this.setState({ missing: data });
+
         setTimeout(() => {
           this.updateTabs();
         }, 200);
@@ -80,12 +138,20 @@ class ScanShelf extends Component {
    * Updates Tabs
    */
   updateTabs = () => {
-    const { shelf_data, routes } = this.state;
+    const { actual, extra, missing, routes } = this.state;
     const routes_copy = [...routes];
 
     const new_routes = routes_copy.map(tab => {
-      if (tab.key == 'first') {
-        tab.title = `Actual (0/${shelf_data.length})`;
+      if (tab.key == 'actual') {
+        tab.title = `Actual (${actual.length}/${missing.length})`;
+      }
+
+      if (tab.key == 'extra') {
+        tab.title = `Extra (${extra.length})`;
+      }
+
+      if (tab.key == 'missing') {
+        tab.title = `Missing (${missing.length})`;
       }
       return tab;
     });
@@ -94,54 +160,29 @@ class ScanShelf extends Component {
   };
 
   render() {
-    const { shelf_no, shelf_data } = this.state;
-
-    const FirstRoute = () => (
-      <View style={[styles.scene]}>
-        <FlatList
-          data={shelf_data}
-          renderItem={({ item }) => (
-            <View key={item.book_id} style={styles.listItem}>
-              <Text style={styles.listItemTitle}>{item.title}</Text>
-              <View style={[styles.listItemDetails, styles.inlineFlow]}>
-                <View style={styles.inlineFlow}>
-                  <Text style={styles.listItemLabel}>By: </Text>
-                  <Text style={styles.listItemText}>{item.author}</Text>
-                </View>
-                <View style={styles.inlineFlow}>
-                  <Text style={[styles.listItemLabel, styles.leftPadding20]}>
-                    ISBN:{' '}
-                  </Text>
-                  <Text style={styles.listItemText}>{item.isbn_number}</Text>
-                </View>
-              </View>
-            </View>
-          )}
-        />
-      </View>
-    );
-
-    const SecondRoute = () => <View style={[styles.scene]} />;
-
-    const ThirdRoute = () => <View style={[styles.scene]} />;
+    const { book_no, missing, actual, extra } = this.state;
+    const ActualView = () => <ListItem data={actual} />;
+    const ExtraView = () => <ListItem data={extra} />;
+    const MissingView = () => <ListItem data={missing} />;
 
     return (
       <>
         <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
           <TextInput
-            value={shelf_no}
+            value={book_no}
             autoCapitalize="none"
             onChangeText={value => {
-              this.setState({ shelf_no: value });
+              this.setState({ book_no: value });
             }}
             placeholder="Enter Book Number"
             underlineColorAndroid="transparent"
             style={[styles.textInput]}
           />
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => this.scanBook(book_no)}>
             <Icon name="send" color="#8c1d1a" />
           </TouchableOpacity>
         </View>
+
         <TabView
           navigationState={this.state}
           renderTabBar={props => (
@@ -164,9 +205,9 @@ class ScanShelf extends Component {
             />
           )}
           renderScene={SceneMap({
-            first: FirstRoute,
-            second: SecondRoute,
-            third: ThirdRoute,
+            actual: ActualView,
+            extra: ExtraView,
+            missing: MissingView,
           })}
           onIndexChange={index => this.setState({ index })}
           initialLayout={{ width: Dimensions.get('window').width }}
@@ -192,10 +233,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     justifyContent: 'space-between',
   },
-  textInput: {},
-  scene: {
-    flex: 1,
-  },
   tabBarHeading: {
     backgroundColor: '#fff',
   },
@@ -207,35 +244,6 @@ const styles = StyleSheet.create({
   },
   tabBarIndicator: {
     backgroundColor: '#006400',
-  },
-  listItem: {
-    backgroundColor: '#fff',
-    paddingVertical: 10,
-    paddingLeft: 20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#a9a9a9',
-    height: 60,
-  },
-  listItemTitle: {
-    flex: 0.6,
-    color: '#000',
-    fontSize: 16,
-  },
-  listItemDetails: {
-    flex: 0.4,
-  },
-  inlineFlow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-  },
-  listItemLabel: {
-    color: '#a9a9a9',
-  },
-  listItemText: {
-    color: '#808080',
-  },
-  leftPadding20: {
-    paddingLeft: 20,
   },
 });
 
