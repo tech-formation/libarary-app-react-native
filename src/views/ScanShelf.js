@@ -18,9 +18,11 @@ import {
 } from '../configs/constants';
 import { Icon } from 'react-native-elements';
 import ListItem from '../components/ListItem';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 class ScanShelf extends Component {
   state = {
+    is_loading: false,
     book_no: '',
     missing: [],
     actual: [],
@@ -73,7 +75,7 @@ class ScanShelf extends Component {
       const actual_copy = [...actual];
       actual_copy.push(scanned);
 
-      this.setState({ missing: missing_copy, actual: actual_copy });
+      this.setState({ missing: missing_copy, actual: actual_copy, index: 0 });
 
       setTimeout(() => {
         this.updateTabs();
@@ -81,7 +83,7 @@ class ScanShelf extends Component {
     } else {
       let url = FETCH_BOOK_URL;
       url = url.replace(/#ID#/g, book_id);
-
+      this.setState({ is_loading: true });
       httpGet(url, {
         headers: {
           Authorization: `Bearer ${TEMP_TOKEN}`,
@@ -92,14 +94,16 @@ class ScanShelf extends Component {
           const extra_copy = [...extra];
           extra_copy.push(data);
 
-          this.setState({ extra: extra_copy });
+          this.setState({ extra: extra_copy, index: 1 });
 
           setTimeout(() => {
             this.updateTabs();
+            this.setState({ is_loading: false });
           }, 100);
         })
         .catch(err => {
           console.log(err);
+          this.setState({ is_loading: false });
         });
     }
   };
@@ -110,7 +114,7 @@ class ScanShelf extends Component {
   scanShelf = book_no => {
     let url = SCAN_SHELF_URL;
     url = url.replace(/#ID#/g, book_no);
-
+    this.setState({ is_loading: true });
     httpGet(url, {
       headers: {
         Authorization: `Bearer ${TEMP_TOKEN}`,
@@ -127,10 +131,12 @@ class ScanShelf extends Component {
 
         setTimeout(() => {
           this.updateTabs();
+          this.setState({ is_loading: false, index: 2 });
         }, 200);
       })
       .catch(err => {
         console.log(err);
+        this.setState({ is_loading: false });
       });
   };
 
@@ -160,13 +166,15 @@ class ScanShelf extends Component {
   };
 
   render() {
-    const { book_no, missing, actual, extra } = this.state;
+    const { book_no, missing, actual, extra, is_loading } = this.state;
     const ActualView = () => <ListItem data={actual} />;
     const ExtraView = () => <ListItem data={extra} />;
     const MissingView = () => <ListItem data={missing} />;
 
     return (
       <>
+        <Spinner visible={is_loading} color="#8c1d1a" />
+
         <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
           <TextInput
             value={book_no}
