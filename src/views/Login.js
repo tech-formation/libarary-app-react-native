@@ -12,6 +12,7 @@ import GlobalStyles from '../assets/styles/StyleSheet';
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 import Home from './Home';
 import ScanShelf from './ScanShelf';
+import Scan from './Scan';
 import { LOGIN_API_URL } from '../configs/constants';
 import { httpPost } from '../utils/http';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -171,10 +172,11 @@ const MainNavigator = createStackNavigator(
   {
     Login: { screen: Login },
     Home: { screen: Home },
+    Scan: { screen: Scan },
     ScanShelf: { screen: ScanShelf },
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'Scan',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',
