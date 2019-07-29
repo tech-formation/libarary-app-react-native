@@ -103,6 +103,18 @@ class ScanShelf extends Component {
           renderItem={({ item }) => (
             <View key={item.book_id} style={styles.listItem}>
               <Text style={styles.listItemTitle}>{item.title}</Text>
+              <View style={[styles.listItemDetails, styles.inlineFlow]}>
+                <View style={styles.inlineFlow}>
+                  <Text style={styles.listItemLabel}>By: </Text>
+                  <Text style={styles.listItemText}>{item.author}</Text>
+                </View>
+                <View style={styles.inlineFlow}>
+                  <Text style={[styles.listItemLabel, styles.leftPadding20]}>
+                    ISBN:{' '}
+                  </Text>
+                  <Text style={styles.listItemText}>{item.isbn_number}</Text>
+                </View>
+              </View>
             </View>
           )}
         />
@@ -191,10 +203,10 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   tabBarHeadingTextActive: {
-    color: 'green',
+    color: '#006400',
   },
   tabBarIndicator: {
-    backgroundColor: 'green',
+    backgroundColor: '#006400',
   },
   listItem: {
     backgroundColor: '#fff',
@@ -202,10 +214,28 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     borderBottomWidth: 0.5,
     borderBottomColor: '#a9a9a9',
-    height: 40,
+    height: 60,
   },
   listItemTitle: {
-    color: '#f00',
+    flex: 0.6,
+    color: '#000',
+    fontSize: 16,
+  },
+  listItemDetails: {
+    flex: 0.4,
+  },
+  inlineFlow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+  },
+  listItemLabel: {
+    color: '#a9a9a9',
+  },
+  listItemText: {
+    color: '#808080',
+  },
+  leftPadding20: {
+    paddingLeft: 20,
   },
 });
 
