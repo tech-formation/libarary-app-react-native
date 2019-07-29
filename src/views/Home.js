@@ -6,6 +6,8 @@ export default class Home extends Component {
   static navigationOptions = { header: null };
 
   render() {
+    const { navigate } = this.props.navigation;
+
     return (
       <View style={GlobalStyles.mainContainer}>
         <View style={GlobalStyles.contentContainer}>
@@ -25,12 +27,12 @@ export default class Home extends Component {
               style={GlobalStyles.button}
             >
               <View>
-                <Text style={GlobalStyles.buttonText}>SCAN A BOOKs</Text>
+                <Text style={GlobalStyles.buttonText}>SCAN A BOOK</Text>
               </View>
             </TouchableOpacity>
             <View style={GlobalStyles.verticalSpace} />
             <TouchableOpacity
-              onPress={this._onPressButton}
+              onPress={() => navigate('ScanShelf')}
               style={GlobalStyles.button}
             >
               <View>
