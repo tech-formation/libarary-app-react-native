@@ -176,7 +176,7 @@ const MainNavigator = createStackNavigator(
     ScanShelf: { screen: ScanShelf },
   },
   {
-    initialRouteName: 'Scan',
+    initialRouteName: 'Login',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',

@@ -6,13 +6,13 @@ import {
   TextInput,
   StyleSheet,
   Dimensions,
-  Button,
   FlatList,
 } from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { httpGet } from '../utils/http';
 import { SCAN_SHELF_URL, TEMP_TOKEN } from '../configs/constants';
+import { Icon } from 'react-native-elements';
 
 class ScanShelf extends Component {
   state = {
@@ -97,36 +97,21 @@ class ScanShelf extends Component {
     const { shelf_no, shelf_data } = this.state;
 
     const FirstRoute = () => (
-      <View style={[styles.scene, { backgroundColor: '#ff4081' }]}>
+      <View style={[styles.scene]}>
         <FlatList
           data={shelf_data}
           renderItem={({ item }) => (
-            <View
-              key={item.book_id}
-              style={[
-                {
-                  backgroundColor: '#673ab7',
-                  paddingVertical: 10,
-                  paddingLeft: 20,
-                  borderBottomWidth: 0.5,
-                  borderBottomColor: '#a9a9a9',
-                },
-              ]}
-            >
-              <Text style={[{ color: '#fff' }]}>{item.title}</Text>
+            <View key={item.book_id} style={styles.listItem}>
+              <Text style={styles.listItemTitle}>{item.title}</Text>
             </View>
           )}
         />
       </View>
     );
 
-    const SecondRoute = () => (
-      <View style={[styles.scene, { backgroundColor: '#673ab7' }]} />
-    );
+    const SecondRoute = () => <View style={[styles.scene]} />;
 
-    const ThirdRoute = () => (
-      <View style={[styles.scene, { backgroundColor: '#ff0000' }]} />
-    );
+    const ThirdRoute = () => <View style={[styles.scene]} />;
 
     return (
       <>
@@ -141,22 +126,26 @@ class ScanShelf extends Component {
             underlineColorAndroid="transparent"
             style={[styles.textInput]}
           />
-          <Button
-            onPress={() => {}}
-            title="Scan"
-            color="#841584"
-            accessibilityLabel="Learn more about this purple button"
-          />
+          <TouchableOpacity onPress={() => {}}>
+            <Icon name="send" color="#8c1d1a" />
+          </TouchableOpacity>
         </View>
         <TabView
           navigationState={this.state}
           renderTabBar={props => (
             <TabBar
               {...props}
-              indicatorStyle={{ backgroundColor: 'black' }}
-              style={{ backgroundColor: 'white' }}
+              indicatorStyle={styles.tabBarIndicator}
+              style={styles.tabBarHeading}
               renderLabel={({ route, focused, color }) => (
-                <Text style={{ color: 'black', fontWeight: '600' }}>
+                <Text
+                  style={
+                    route.key ===
+                    props.navigationState.routes[this.state.index].key
+                      ? styles.tabBarHeadingTextActive
+                      : styles.tabBarHeadingText
+                  }
+                >
                   {route.title}
                 </Text>
               )}
@@ -194,6 +183,29 @@ const styles = StyleSheet.create({
   textInput: {},
   scene: {
     flex: 1,
+  },
+  tabBarHeading: {
+    backgroundColor: '#fff',
+  },
+  tabBarHeadingText: {
+    color: 'black',
+  },
+  tabBarHeadingTextActive: {
+    color: 'green',
+  },
+  tabBarIndicator: {
+    backgroundColor: 'green',
+  },
+  listItem: {
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingLeft: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#a9a9a9',
+    height: 40,
+  },
+  listItemTitle: {
+    color: '#f00',
   },
 });
 
