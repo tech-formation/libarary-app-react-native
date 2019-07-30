@@ -15,25 +15,32 @@ const menu_data = [
 
 const Menu = () => {
   return (
-    <View style={[styles.menu]}>
-      <FlatList
-        data={menu_data}
-        renderItem={({ item }) => (
-          <View key={item.id} style={styles.menuItem}>
-            <TouchableOpacity style={styles.menuIcon}>
-              <Icon name={item.icon} color="#a9a9a9" size={16} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuTitle}>
-              <Text>{item.title}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+    <View style={styles.menuContainer}>
+      <View style={[styles.menu]}>
+        <FlatList
+          data={menu_data}
+          renderItem={({ item }) => (
+            <View key={item.id} style={styles.menuItem}>
+              <TouchableOpacity style={styles.menuIcon}>
+                <Icon name={item.icon} color="#a9a9a9" size={16} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuTitle}>
+                <Text>{item.title}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  menuContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
   menu: {
     backgroundColor: '#fff',
     shadowColor: '#000',
