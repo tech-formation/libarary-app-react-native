@@ -75,20 +75,13 @@ export default class Scan extends Component {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.menuContainer}>
-          <Menu />
-        </View>
+        {false && <Menu />}
       </>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  menuContainer: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-  },
   inputContainer: {
     justifyContent: 'space-between',
   },

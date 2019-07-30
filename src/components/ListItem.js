@@ -6,6 +6,7 @@ const ListItem = ({ data }) => {
     <View style={[styles.scene]}>
       <FlatList
         data={data}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View key={item.book_id} style={styles.listItem}>
             <Text style={styles.listItemTitle}>{item.title}</Text>
