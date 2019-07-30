@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Button,
   Alert,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
+import Menu from '../components/Menu';
 
 export default class Scan extends Component {
   state = {
@@ -57,34 +57,38 @@ export default class Scan extends Component {
     const { shelf_no } = this.state;
 
     return (
-      <View>
-        <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
-          <TextInput
-            placeholder="Enter Shelf Number"
-            underlineColorAndroid="transparent"
-            style={[styles.textInput]}
-            autoCapitalize="none"
-            value={shelf_no}
-            onChangeText={value => {
-              this.setState({ shelf_no: value });
-            }}
-          />
-          <TouchableOpacity onPress={() => this.scanShelf()}>
-            <Icon name="send" color="#8c1d1a" />
-          </TouchableOpacity>
-          {/* <Button
-            onPress={() => this.scanShelf()}
-            title="Scan"
-            color="#841584"
-            accessibilityLabel="Learn more about this purple button"
-          /> */}
+      <>
+        <View style={styles.mainContainer}>
+          <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
+            <TextInput
+              placeholder="Enter Shelf Number"
+              underlineColorAndroid="transparent"
+              style={[styles.textInput]}
+              autoCapitalize="none"
+              value={shelf_no}
+              onChangeText={value => {
+                this.setState({ shelf_no: value });
+              }}
+            />
+            <TouchableOpacity onPress={() => this.scanShelf()}>
+              <Icon name="send" color="#8c1d1a" />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+        <View style={styles.menuContainer}>
+          <Menu />
+        </View>
+      </>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  menuContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
   inputContainer: {
     justifyContent: 'space-between',
   },
