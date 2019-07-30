@@ -57,6 +57,15 @@ class ScanShelf extends Component {
   }
 
   /**
+   * Book Exist in array or not
+   */
+  isExistInArray = (stack, needle) => {
+    return stack.find(book => {
+      return book.book_id == needle.book_id;
+    });
+  };
+
+  /**
    * Scan Book & Adjust the Tabs
    */
   scanBook = book_id => {
@@ -64,22 +73,22 @@ class ScanShelf extends Component {
 
     const { missing, actual, extra } = this.state;
 
-    const scanned = missing.find(book => {
+    const scanned = [...missing, ...actual].find(book => {
       return book.book_id == book_id;
     });
 
     if (scanned) {
       const missing_copy = [...missing];
-      missing_copy.splice(missing.indexOf(scanned), 1);
+      if (this.isExistInArray(missing_copy, scanned)) {
+        missing_copy.splice(missing.indexOf(scanned), 1);
+      }
 
       const actual_copy = [...actual];
-      actual_copy.push(scanned);
+      if (!this.isExistInArray(actual_copy, scanned)) actual_copy.push(scanned);
 
       this.setState({ missing: missing_copy, actual: actual_copy, index: 0 });
 
-      setTimeout(() => {
-        this.updateTabs();
-      }, 100);
+      setTimeout(() => this.updateTabs(), 100);
     } else {
       let url = FETCH_BOOK_URL;
       url = url.replace(/#ID#/g, book_id);
@@ -92,7 +101,8 @@ class ScanShelf extends Component {
         .then(res => {
           const { data } = res;
           const extra_copy = [...extra];
-          extra_copy.push(data);
+
+          if (!this.isExistInArray(extra_copy, data)) extra_copy.push(data);
 
           this.setState({ extra: extra_copy, index: 1 });
 
