@@ -19,6 +19,7 @@ import {
 import { Icon } from 'react-native-elements';
 import ListItem from '../components/ListItem';
 import Spinner from 'react-native-loading-spinner-overlay';
+import Toast from 'react-native-simple-toast';
 
 class ScanShelf extends Component {
   state = {
@@ -145,7 +146,7 @@ class ScanShelf extends Component {
         }, 200);
       })
       .catch(err => {
-        console.log(err);
+        Toast.show(err.message);
         this.setState({ is_loading: false });
       });
   };

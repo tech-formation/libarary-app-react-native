@@ -58,3 +58,4 @@ buck-out/
 /ios/Pods/
 *.lock
 /ios/library.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+/ios/library.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
