@@ -19,10 +19,13 @@ import {
 import { Icon } from 'react-native-elements';
 import ListItem from '../components/ListItem';
 import Spinner from 'react-native-loading-spinner-overlay';
+import { showToast } from '../utils/helper';
+import AsyncStorage from '@react-native-community/async-storage';
 
 class ScanShelf extends Component {
   state = {
     is_loading: false,
+    token: '',
     book_no: '',
     missing: [],
     actual: [],
@@ -46,15 +49,33 @@ class ScanShelf extends Component {
             <Text style={GlobalStyles.buttonText}>Scan a Book</Text>
           </View>
         </TouchableOpacity>
+        <TouchableOpacity onPress={this._onPressButton}>
+          <Icon name="more-vert" color="#fff" />
+        </TouchableOpacity>
       </View>
     ),
   };
 
   componentDidMount() {
-    const { navigation } = this.props;
-    const book_no = navigation.getParam('book_no', '2');
-    this.scanShelf(book_no);
+    this.getToken();
   }
+
+  getToken = async () => {
+    const { navigate } = this.props.navigation;
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token != null) {
+        this.setState({ token });
+        const { navigation } = this.props;
+        const book_no = navigation.getParam('book_no', '2');
+        this.scanShelf(book_no);
+      } else {
+        navigate('Login');
+      }
+    } catch (e) {
+      showToast(e);
+    }
+  };
 
   /**
    * Book Exist in array or not
@@ -71,7 +92,7 @@ class ScanShelf extends Component {
   scanBook = book_id => {
     if (!book_id) Alert.alert('Please enter Book Number to scan');
 
-    const { missing, actual, extra } = this.state;
+    const { missing, actual, extra, token } = this.state;
 
     const scanned = [...missing, ...actual].find(book => {
       return book.book_id == book_id;
@@ -95,7 +116,7 @@ class ScanShelf extends Component {
       this.setState({ is_loading: true });
       httpGet(url, {
         headers: {
-          Authorization: `Bearer ${TEMP_TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
       })
         .then(res => {
@@ -127,7 +148,7 @@ class ScanShelf extends Component {
     this.setState({ is_loading: true });
     httpGet(url, {
       headers: {
-        Authorization: `Bearer ${TEMP_TOKEN}`,
+        Authorization: `Bearer ${this.state.token}`,
       },
     })
       .then(res => {
@@ -145,8 +166,8 @@ class ScanShelf extends Component {
         }, 200);
       })
       .catch(err => {
-        console.log(err);
         this.setState({ is_loading: false });
+        showToast(err.error);
       });
   };
 

@@ -6,7 +6,6 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { createStackNavigator, createAppContainer } from 'react-navigation';
@@ -16,20 +15,21 @@ import Scan from './Scan';
 import { LOGIN_API_URL } from '../configs/constants';
 import { httpPost } from '../utils/http';
 import AsyncStorage from '@react-native-community/async-storage';
+import { showToast } from '../utils/helper';
 
-// To see all the requests in the chrome Dev tools in the network tab.
-XMLHttpRequest = GLOBAL.originalXMLHttpRequest
-  ? GLOBAL.originalXMLHttpRequest
-  : GLOBAL.XMLHttpRequest;
+// // To see all the requests in the chrome Dev tools in the network tab.
+// XMLHttpRequest = GLOBAL.originalXMLHttpRequest
+//   ? GLOBAL.originalXMLHttpRequest
+//   : GLOBAL.XMLHttpRequest;
 
 // fetch logger
-global._fetch = fetch;
-global.fetch = function(uri, options, ...args) {
-  return global._fetch(uri, options, ...args).then(response => {
-    console.log('Fetch', { request: { uri, options, ...args }, response });
-    return response;
-  });
-};
+// global._fetch = fetch;
+// global.fetch = function(uri, options, ...args) {
+//   return global._fetch(uri, options, ...args).then(response => {
+//     console.log('Fetch', { request: { uri, options, ...args }, response });
+//     return response;
+//   });
+// };
 
 class Login extends Component {
   static navigationOptions = { header: null };
@@ -38,8 +38,8 @@ class Login extends Component {
    * State
    */
   state = {
-    username: '',
-    password: '',
+    username: 'admin',
+    password: '53cret!@#$',
   };
 
   saveLoggedInUserInfo = async (token, user) => {
@@ -47,16 +47,20 @@ class Login extends Component {
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', user);
     } catch (e) {
-      console.log(e);
+      showToast(e);
     }
-    console.log('Done.');
   };
 
   handleLoginRequest = () => {
     const { username, password } = this.state;
 
+    if (!username || !password) {
+      showToast('Please enter username & password.');
+      return;
+    }
+
     if (password.length < 6) {
-      Alert.alert('The password must be at least 6 characters.');
+      showToast('The password must be at least 6 characters.');
       return;
     }
 
@@ -69,12 +73,12 @@ class Login extends Component {
         navigate('Home');
       })
       .catch(err => {
-        Alert.alert(err.error);
+        showToast(err.error);
       });
   };
 
   render() {
-    const { username, password } = this.state;
+    const { username, password, loading } = this.state;
 
     return (
       <View style={GlobalStyles.mainContainer}>
@@ -176,7 +180,7 @@ const MainNavigator = createStackNavigator(
     ScanShelf: { screen: ScanShelf },
   },
   {
-    initialRouteName: 'ScanShelf',
+    initialRouteName: 'Login',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',
