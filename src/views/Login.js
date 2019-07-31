@@ -47,7 +47,7 @@ class Login extends Component {
       await AsyncStorage.setItem('token', token);
       await AsyncStorage.setItem('user', user);
     } catch (e) {
-      showToast(e);
+      // showToast(e);
     }
   };
 
