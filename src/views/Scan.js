@@ -8,14 +8,29 @@ import {
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
-import Menu from '../components/Menu';
+import VectorIcon from 'react-native-vector-icons/MaterialIcons';
 import { showToast } from '../utils/helper';
+import Menu, { MenuItem } from 'react-native-material-menu';
 
 export default class Scan extends Component {
   constructor(props) {
     super(props);
     this.toggleMenu = this.toggleMenu.bind(this);
   }
+
+  static _menu = null;
+
+  static setMenuRef = ref => {
+    this._menu = ref;
+  };
+
+  static hideMenu = () => {
+    this._menu.hide();
+  };
+
+  static showMenu = () => {
+    this._menu.show();
+  };
 
   state = {
     shelf_no: '',
@@ -35,9 +50,19 @@ export default class Scan extends Component {
               <Text style={GlobalStyles.buttonText}>Scan a Book</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => params.handleMenuClick()}>
+          <TouchableOpacity onPress={this.showMenu}>
             <Icon name="more-vert" color="#fff" />
           </TouchableOpacity>
+          <Menu ref={this.setMenuRef}>
+            <MenuItem onPress={this.hideMenu} textStyle={GlobalStyles.menuText}>
+              <VectorIcon name="lock" size={12} color="#808080" />
+              <Text> Change Password</Text>
+            </MenuItem>
+            <MenuItem onPress={this.hideMenu} textStyle={GlobalStyles.menuText}>
+              <VectorIcon name="exit-to-app" size={12} color="#808080" />
+              <Text> Logout</Text>
+            </MenuItem>
+          </Menu>
         </View>
       ),
     };
@@ -94,7 +119,6 @@ export default class Scan extends Component {
             </TouchableOpacity>
           </View>
         </View>
-        {show_menu && <Menu />}
       </>
     );
   }
