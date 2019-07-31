@@ -5,34 +5,53 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
 import Menu from '../components/Menu';
+import { showToast } from '../utils/helper';
 
 export default class Scan extends Component {
+  constructor(props) {
+    super(props);
+    this.toggleMenu = this.toggleMenu.bind(this);
+  }
+
   state = {
     shelf_no: '',
+    show_menu: false,
   };
 
-  static navigationOptions = {
-    headerRight: (
-      <View style={GlobalStyles.headerRightContainer}>
-        <TouchableOpacity
-          onPress={this._onPressButton}
-          style={GlobalStyles.headerRightButton}
-        >
-          <View>
-            <Text style={GlobalStyles.buttonText}>Scan a Book</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this._onPressButton}>
-          <Icon name="more-vert" color="#fff" />
-        </TouchableOpacity>
-      </View>
-    ),
+  static navigationOptions = ({ navigation }) => {
+    const { params = {} } = navigation.state;
+    return {
+      headerRight: (
+        <View style={GlobalStyles.headerRightContainer}>
+          <TouchableOpacity
+            onPress={this._onPressButton}
+            style={GlobalStyles.headerRightButton}
+          >
+            <View>
+              <Text style={GlobalStyles.buttonText}>Scan a Book</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => params.handleMenuClick()}>
+            <Icon name="more-vert" color="#fff" />
+          </TouchableOpacity>
+        </View>
+      ),
+    };
   };
+
+  componentDidMount() {
+    this.props.navigation.setParams({
+      handleMenuClick: this.toggleMenu,
+    });
+  }
+
+  toggleMenu() {
+    this.setState({ show_menu: !this.state.show_menu });
+  }
 
   /**
    * Handles scan shelf
@@ -44,7 +63,7 @@ export default class Scan extends Component {
     } = this.props;
 
     if (!shelf_no) {
-      Alert.alert('Please enter shelf no to scan.');
+      showToast('Please enter shelf no to scan.');
       return;
     }
 
@@ -54,7 +73,7 @@ export default class Scan extends Component {
   };
 
   render() {
-    const { shelf_no } = this.state;
+    const { shelf_no, show_menu } = this.state;
 
     return (
       <>
@@ -75,7 +94,7 @@ export default class Scan extends Component {
             </TouchableOpacity>
           </View>
         </View>
-        {false && <Menu />}
+        {show_menu && <Menu />}
       </>
     );
   }
