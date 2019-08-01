@@ -86,10 +86,12 @@ export default class Scan extends Component {
               underlineColorAndroid="transparent"
               style={[styles.textInput]}
               autoCapitalize="none"
+              keyboardType="numeric"
               value={number}
               onChangeText={value => {
                 this.setState({ number: value });
               }}
+              onSubmitEditing={this.scanEntity}
             />
             <TouchableOpacity onPress={() => this.scanEntity()}>
               <Icon name="send" color="#8c1d1a" />

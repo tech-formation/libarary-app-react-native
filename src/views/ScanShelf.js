@@ -205,8 +205,10 @@ class ScanShelf extends Component {
               this.setState({ book_no: value });
             }}
             placeholder="Enter Book Number"
+            keyboardType="numeric"
             underlineColorAndroid="transparent"
             style={[styles.textInput]}
+            onSubmitEditing={event => this.scanBook(event.nativeEvent.text)}
           />
           <TouchableOpacity onPress={() => this.scanBook(book_no)}>
             <Icon name="send" color="#8c1d1a" />
