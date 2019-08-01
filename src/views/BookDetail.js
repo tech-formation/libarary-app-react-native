@@ -11,9 +11,9 @@ import {
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
 
-export default class Scan extends Component {
+export default class BookDetail extends Component {
   state = {
-    shelf_no: '',
+    book_no: '',
   };
 
   static navigationOptions = {
@@ -37,24 +37,24 @@ export default class Scan extends Component {
   /**
    * Handles scan shelf
    */
-  scanShelf = () => {
-    const { shelf_no } = this.state;
+  scanBook = () => {
+    const { book_no } = this.state;
     const {
       navigation: { navigate },
     } = this.props;
 
-    if (!shelf_no) {
+    if (!book_no) {
       Alert.alert('Please enter shelf no to scan.');
       return;
     }
 
     navigate('ScanShelf', {
-      shelf_no,
+      book_no,
     });
   };
 
   render() {
-    const { shelf_no } = this.state;
+    const { book_no } = this.state;
 
     return (
       <>
@@ -65,9 +65,9 @@ export default class Scan extends Component {
               underlineColorAndroid="transparent"
               style={[styles.textInput]}
               autoCapitalize="none"
-              value={shelf_no}
+              value={book_no}
               onChangeText={value => {
-                this.setState({ shelf_no: value });
+                this.setState({ book_no: value });
               }}
             />
             <TouchableOpacity onPress={() => this.scanShelf()}>

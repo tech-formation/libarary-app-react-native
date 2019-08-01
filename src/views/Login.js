@@ -16,6 +16,8 @@ import { LOGIN_API_URL } from '../configs/constants';
 import { httpPost } from '../utils/http';
 import AsyncStorage from '@react-native-community/async-storage';
 import { showToast } from '../utils/helper';
+import BookDetail from './BookDetail';
+import ChangePassword from './ChangePassword';
 
 // // To see all the requests in the chrome Dev tools in the network tab.
 // XMLHttpRequest = GLOBAL.originalXMLHttpRequest
@@ -78,7 +80,7 @@ class Login extends Component {
   };
 
   render() {
-    const { username, password, loading } = this.state;
+    const { username, password } = this.state;
 
     return (
       <View style={GlobalStyles.mainContainer}>
@@ -178,9 +180,11 @@ const MainNavigator = createStackNavigator(
     Home: { screen: Home },
     Scan: { screen: Scan },
     ScanShelf: { screen: ScanShelf },
+    BoolDetail: { screen: BookDetail },
+    ChangePassword: { screen: ChangePassword },
   },
   {
-    initialRouteName: 'Login',
+    initialRouteName: 'Home',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',
