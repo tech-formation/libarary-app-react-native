@@ -180,11 +180,11 @@ const MainNavigator = createStackNavigator(
     Home: { screen: Home },
     Scan: { screen: Scan },
     ScanShelf: { screen: ScanShelf },
-    BoolDetail: { screen: BookDetail },
+    BookDetail: { screen: BookDetail },
     ChangePassword: { screen: ChangePassword },
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'Login',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',

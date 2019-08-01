@@ -10,28 +10,57 @@ import {
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
+import HeaderMenu from '../components/HeaderMenu';
+import AsyncStorage from '@react-native-community/async-storage';
+import { FETCH_BOOK_URL } from '../configs/constants';
+import { httpGet } from '../utils/http';
+import { showToast } from '../utils/helper';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class BookDetail extends Component {
   state = {
+    is_loading: false,
     book_no: '',
+    token: '',
+    book: {
+      shelf_id: '',
+      isbn_number: '',
+      title: '',
+      author: '',
+    },
   };
 
-  static navigationOptions = {
-    headerRight: (
-      <View style={GlobalStyles.headerRightContainer}>
-        <TouchableOpacity
-          onPress={this._onPressButton}
-          style={GlobalStyles.headerRightButton}
-        >
-          <View>
-            <Text style={GlobalStyles.buttonText}>Scan a Shelf</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this._onPressButton}>
-          <Icon name="more-vert" color="#fff" />
-        </TouchableOpacity>
-      </View>
-    ),
+  static navigationOptions = ({ navigation }) => {
+    const { navigate } = navigation;
+
+    return {
+      headerRight: (
+        <View style={GlobalStyles.headerRightContainer}>
+          <HeaderMenu navigate={navigate} />
+        </View>
+      ),
+    };
+  };
+
+  componentDidMount() {
+    this.getToken();
+  }
+
+  getToken = async () => {
+    const { navigate } = this.props.navigation;
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token != null) {
+        const { navigation } = this.props;
+        const book_no = navigation.getParam('book_no');
+        this.setState({ token, book_no });
+        this.scanBook();
+      } else {
+        navigate('Login');
+      }
+    } catch (e) {
+      // showToast(e);
+    }
   };
 
   /**
@@ -39,25 +68,39 @@ export default class BookDetail extends Component {
    */
   scanBook = () => {
     const { book_no } = this.state;
-    const {
-      navigation: { navigate },
-    } = this.props;
+    const { token } = this.state;
 
     if (!book_no) {
-      Alert.alert('Please enter shelf no to scan.');
+      Alert.alert('Please enter book no to scan.');
       return;
     }
 
-    navigate('ScanShelf', {
-      book_no,
-    });
+    let url = FETCH_BOOK_URL;
+    url = url.replace(/#ID#/g, book_no);
+    this.setState({ is_loading: true });
+
+    httpGet(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => {
+        const { data } = res;
+        this.setState({ is_loading: false, book: { ...data } });
+      })
+      .catch(err => {
+        this.setState({ is_loading: false });
+        setTimeout(() => showToast(err.error), 100);
+      });
   };
 
   render() {
-    const { book_no } = this.state;
+    const { book_no, is_loading, book } = this.state;
 
     return (
       <>
+        <Spinner visible={is_loading} color="#8c1d1a" />
+
         <View style={styles.mainContainer}>
           <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
             <TextInput
@@ -70,10 +113,11 @@ export default class BookDetail extends Component {
                 this.setState({ book_no: value });
               }}
             />
-            <TouchableOpacity onPress={() => this.scanShelf()}>
+            <TouchableOpacity onPress={() => this.scanBook()}>
               <Icon name="send" color="#8c1d1a" />
             </TouchableOpacity>
           </View>
+
           <View style={styles.detailsContainer}>
             <View style={styles.detailsTopRow}>
               <View style={styles.detailImageContainer}>
@@ -83,13 +127,15 @@ export default class BookDetail extends Component {
                 />
               </View>
               <View style={styles.titleContainer}>
-                <Text style={styles.bookTitle}>The Legacy of Love</Text>
-                <Text style={styles.bookSubTitle}>By: Sudha Murthy</Text>
-                <Text style={styles.bookSubTitle}>ISBN: 2434244324423</Text>
+                <Text style={styles.bookTitle}>{book.title}</Text>
+                <Text style={styles.bookSubTitle}>By: {book.author}</Text>
+                <Text style={styles.bookSubTitle}>
+                  ISBN: {book.isbn_number}
+                </Text>
               </View>
             </View>
             <View style={styles.detailMidRow}>
-              <Text style={styles.bookSubTitle}>Shelf No: 100</Text>
+              <Text style={styles.bookSubTitle}>Shelf No: {book.shelf_id}</Text>
               <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
                 Row No: 2
               </Text>
@@ -106,14 +152,15 @@ export default class BookDetail extends Component {
                 survived not only five centuries, but also the leap into
                 electronic typesetting, remaining essentially unchanged.
               </Text>
-              <TouchableOpacity
+
+              {/* <TouchableOpacity
                 onPress={this._onPressButton}
                 style={styles.scanBookButton}
               >
                 <View>
                   <Text style={styles.scanBookText}>SCAN OTHER BOOK</Text>
                 </View>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         </View>

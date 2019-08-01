@@ -63,10 +63,11 @@ export default class Scan extends Component {
       showToast(`Please enter ${type} no to scan.`);
       return;
     }
+
     if (type == 'book') {
-      navigate('BookDetail', { number });
+      navigate('BookDetail', { book_no: number });
     } else {
-      navigate('ScanShelf', { number });
+      navigate('ScanShelf', { shelf_no: number });
     }
   };
 

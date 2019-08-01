@@ -11,11 +11,7 @@ import {
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { httpGet } from '../utils/http';
-import {
-  SCAN_SHELF_URL,
-  TEMP_TOKEN,
-  FETCH_BOOK_URL,
-} from '../configs/constants';
+import { SCAN_SHELF_URL, FETCH_BOOK_URL } from '../configs/constants';
 import { Icon } from 'react-native-elements';
 import ListItem from '../components/ListItem';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -67,13 +63,13 @@ class ScanShelf extends Component {
       if (token != null) {
         this.setState({ token });
         const { navigation } = this.props;
-        const book_no = navigation.getParam('book_no', '2');
-        this.scanShelf(book_no);
+        const shelf_no = navigation.getParam('shelf_no');
+        this.scanShelf(shelf_no);
       } else {
         navigate('Login');
       }
     } catch (e) {
-      showToast(e);
+      // showToast(e);
     }
   };
 
@@ -89,13 +85,13 @@ class ScanShelf extends Component {
   /**
    * Scan Book & Adjust the Tabs
    */
-  scanBook = book_id => {
-    if (!book_id) Alert.alert('Please enter Book Number to scan');
+  scanBook = book_no => {
+    if (!book_no) Alert.alert('Please enter Book Number to scan');
 
     const { missing, actual, extra, token } = this.state;
 
     const scanned = [...missing, ...actual].find(book => {
-      return book.book_id == book_id;
+      return book.book_id == book_no;
     });
 
     if (scanned) {
@@ -112,7 +108,7 @@ class ScanShelf extends Component {
       setTimeout(() => this.updateTabs(), 100);
     } else {
       let url = FETCH_BOOK_URL;
-      url = url.replace(/#ID#/g, book_id);
+      url = url.replace(/#ID#/g, book_no);
       this.setState({ is_loading: true });
       httpGet(url, {
         headers: {
@@ -133,8 +129,8 @@ class ScanShelf extends Component {
           }, 100);
         })
         .catch(err => {
-          console.log(err);
           this.setState({ is_loading: false });
+          setTimeout(() => showToast(err.error), 100);
         });
     }
   };
@@ -142,9 +138,9 @@ class ScanShelf extends Component {
   /**
    * Scan Shelf
    */
-  scanShelf = book_no => {
+  scanShelf = shelf_no => {
     let url = SCAN_SHELF_URL;
-    url = url.replace(/#ID#/g, book_no);
+    url = url.replace(/#ID#/g, shelf_no);
     this.setState({ is_loading: true });
     httpGet(url, {
       headers: {
@@ -167,7 +163,7 @@ class ScanShelf extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        showToast(err.error);
+        setTimeout(() => showToast(err.error), 100);
       });
   };
 
