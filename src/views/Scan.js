@@ -91,6 +91,7 @@ export default class Scan extends Component {
               onChangeText={value => {
                 this.setState({ number: value });
               }}
+              onSubmitEditing={this.scanEntity}
             />
             <TouchableOpacity onPress={() => this.scanEntity()}>
               <Icon name="send" color="#8c1d1a" />

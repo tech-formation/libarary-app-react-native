@@ -111,6 +111,7 @@ export default class BookDetail extends Component {
               autoCapitalize="none"
               keyboardType="numeric"
               value={book_no}
+              onSubmitEditing={this.scanBook}
               onChangeText={value => {
                 this.setState({ book_no: value });
               }}
