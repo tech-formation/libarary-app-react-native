@@ -9,6 +9,10 @@ import {
 import GlobalStyles from '../assets/styles/StyleSheet';
 
 export default class ChangePassword extends Component {
+  static navigationOptions = {
+    title: 'Change Password',
+  };
+
   render() {
     return (
       <View style={styles.container}>

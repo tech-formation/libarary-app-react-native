@@ -17,6 +17,7 @@ import ListItem from '../components/ListItem';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { showToast } from '../utils/helper';
 import AsyncStorage from '@react-native-community/async-storage';
+import HeaderMenu from '../components/HeaderMenu';
 
 class ScanShelf extends Component {
   state = {
@@ -34,22 +35,16 @@ class ScanShelf extends Component {
     ],
   };
 
-  static navigationOptions = {
-    headerRight: (
-      <View style={GlobalStyles.headerRightContainer}>
-        <TouchableOpacity
-          onPress={this._onPressButton}
-          style={GlobalStyles.headerRightButton}
-        >
-          <View>
-            <Text style={GlobalStyles.buttonText}>Scan a Book</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this._onPressButton}>
-          <Icon name="more-vert" color="#fff" />
-        </TouchableOpacity>
-      </View>
-    ),
+  static navigationOptions = ({ navigation }) => {
+    const { navigate } = navigation;
+    return {
+      title: 'History',
+      headerRight: (
+        <View style={GlobalStyles.headerRightContainer}>
+          <HeaderMenu navigate={navigate} />
+        </View>
+      ),
+    };
   };
 
   componentDidMount() {

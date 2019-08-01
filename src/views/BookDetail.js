@@ -34,6 +34,7 @@ export default class BookDetail extends Component {
     const { navigate } = navigation;
 
     return {
+      title: 'Details',
       headerRight: (
         <View style={GlobalStyles.headerRightContainer}>
           <HeaderMenu navigate={navigate} />
