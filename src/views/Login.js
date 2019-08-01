@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { showToast } from '../utils/helper';
 import BookDetail from './BookDetail';
 import ChangePassword from './ChangePassword';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 // // To see all the requests in the chrome Dev tools in the network tab.
 // XMLHttpRequest = GLOBAL.originalXMLHttpRequest
@@ -40,6 +41,7 @@ class Login extends Component {
    * State
    */
   state = {
+    is_loading: false,
     username: 'admin',
     password: '53cret!@#$',
   };
@@ -66,78 +68,85 @@ class Login extends Component {
       return;
     }
 
+    this.setState({ is_loading: true });
     const params = { username, password };
 
     httpPost(LOGIN_API_URL, params)
       .then(res => {
         const { navigate } = this.props.navigation;
         this.saveLoggedInUserInfo(res.token, res.user);
+        this.setState({ is_loading: false });
         navigate('Home');
       })
       .catch(err => {
-        showToast(err.error);
+        this.setState({ is_loading: false });
+        setTimeout(() => showToast(err.error), 100);
       });
   };
 
   render() {
-    const { username, password } = this.state;
+    const { username, password, is_loading } = this.state;
 
     return (
-      <View style={GlobalStyles.mainContainer}>
-        <View style={GlobalStyles.contentContainer}>
-          <View style={GlobalStyles.logoContainer}>
-            <Image
-              source={require('../assets/images/logo.png')}
-              style={GlobalStyles.logoImage}
-            />
-          </View>
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Image
-                source={require('../assets/images/ico-email.png')} //Change your icon image here
-                style={styles.inputIcon}
-              />
+      <>
+        <Spinner visible={is_loading} color="#8c1d1a" />
 
-              <TextInput
-                style={styles.textInput}
-                placeholder="Username"
-                value={username}
-                autoCapitalize="none"
-                onChangeText={value => {
-                  this.setState({ username: value });
-                }}
-                underlineColorAndroid="transparent"
+        <View style={GlobalStyles.mainContainer}>
+          <View style={GlobalStyles.contentContainer}>
+            <View style={GlobalStyles.logoContainer}>
+              <Image
+                source={require('../assets/images/logo.png')}
+                style={GlobalStyles.logoImage}
               />
             </View>
-            <View style={styles.inputContainer}>
-              <Image
-                source={require('../assets/images/ico-password.png')} //Change your icon image here
-                style={styles.inputIcon}
-              />
+            <View style={styles.formContainer}>
+              <View style={styles.inputContainer}>
+                <Image
+                  source={require('../assets/images/ico-email.png')} //Change your icon image here
+                  style={styles.inputIcon}
+                />
 
-              <TextInput
-                style={styles.textInput}
-                placeholder="Password"
-                value={password}
-                secureTextEntry={true}
-                autoCompleteType="password"
-                onChangeText={value => {
-                  this.setState({ password: value });
-                }}
-                underlineColorAndroid="transparent"
-              />
-            </View>
-            <TouchableOpacity
-              onPress={this.handleLoginRequest}
-              style={GlobalStyles.button}
-            >
-              <View>
-                <Text style={GlobalStyles.buttonText}>LOGIN</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Username"
+                  value={username}
+                  autoCapitalize="none"
+                  onChangeText={value => {
+                    this.setState({ username: value });
+                  }}
+                  underlineColorAndroid="transparent"
+                />
               </View>
-            </TouchableOpacity>
+              <View style={styles.inputContainer}>
+                <Image
+                  source={require('../assets/images/ico-password.png')} //Change your icon image here
+                  style={styles.inputIcon}
+                />
+
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Password"
+                  value={password}
+                  secureTextEntry={true}
+                  autoCompleteType="password"
+                  onChangeText={value => {
+                    this.setState({ password: value });
+                  }}
+                  underlineColorAndroid="transparent"
+                />
+              </View>
+              <TouchableOpacity
+                onPress={this.handleLoginRequest}
+                style={GlobalStyles.button}
+              >
+                <View>
+                  <Text style={GlobalStyles.buttonText}>LOGIN</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
+      </>
     );
   }
 }
