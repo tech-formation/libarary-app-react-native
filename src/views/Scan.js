@@ -86,6 +86,7 @@ export default class Scan extends Component {
               underlineColorAndroid="transparent"
               style={[styles.textInput]}
               autoCapitalize="none"
+              keyboardType="numeric"
               value={number}
               onChangeText={value => {
                 this.setState({ number: value });

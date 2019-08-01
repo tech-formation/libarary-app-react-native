@@ -205,6 +205,7 @@ class ScanShelf extends Component {
               this.setState({ book_no: value });
             }}
             placeholder="Enter Book Number"
+            keyboardType="numeric"
             underlineColorAndroid="transparent"
             style={[styles.textInput]}
           />

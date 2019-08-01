@@ -109,6 +109,7 @@ export default class BookDetail extends Component {
               underlineColorAndroid="transparent"
               style={[styles.textInput]}
               autoCapitalize="none"
+              keyboardType="numeric"
               value={book_no}
               onChangeText={value => {
                 this.setState({ book_no: value });
