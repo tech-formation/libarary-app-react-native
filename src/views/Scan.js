@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
-import { showToast } from '../utils/helper';
+import { showToast, capitalize } from '../utils/helper';
 import HeaderMenu from '../components/HeaderMenu';
 
 export default class Scan extends Component {
@@ -21,6 +21,7 @@ export default class Scan extends Component {
     } = navigation;
 
     return {
+      title: `Scan ${capitalize(type)}`,
       headerRight: (
         <View style={GlobalStyles.headerRightContainer}>
           <TouchableOpacity
@@ -63,10 +64,11 @@ export default class Scan extends Component {
       showToast(`Please enter ${type} no to scan.`);
       return;
     }
+
     if (type == 'book') {
-      navigate('BookDetail', { number });
+      navigate('BookDetail', { book_no: number });
     } else {
-      navigate('ScanShelf', { number });
+      navigate('ScanShelf', { shelf_no: number });
     }
   };
 

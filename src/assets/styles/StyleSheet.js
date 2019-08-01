@@ -71,7 +71,7 @@ export default StyleSheet.create({
     padding: 5,
     borderColor: '#fff',
     borderRadius: 5,
-    right: 20,
+    right: 5,
   },
   menuText: {
     color: '#808080',
