@@ -7,64 +7,159 @@ import {
   StyleSheet,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
+import AsyncStorage from '@react-native-community/async-storage';
+import { showToast } from '../utils/helper';
+import { httpPost } from '../utils/http';
+import { CHANGE_PASSWORD_URL } from '../configs/constants';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class ChangePassword extends Component {
+  state = {
+    is_loading: false,
+    token: '',
+    old_password: '',
+    new_password: '',
+    confirm_password: '',
+  };
+
   static navigationOptions = {
     title: 'Change Password',
   };
 
+  componentDidMount() {
+    this.getToken();
+  }
+
+  resetForm = () => {
+    this.setState({
+      old_password: '',
+      new_password: '',
+      confirm_password: '',
+    });
+  };
+
+  getToken = async () => {
+    const { navigate } = this.props.navigation;
+    const token = await AsyncStorage.getItem('token');
+
+    if (token != null) {
+      this.setState({ token });
+    } else {
+      navigate('Login');
+    }
+  };
+
+  handleChangePasswordRequest = () => {
+    const { old_password, new_password, confirm_password, token } = this.state;
+
+    if (old_password.length < 6) {
+      showToast('Old password must be at least 6 characters');
+      return;
+    }
+
+    if (new_password.length < 6) {
+      showToast('New password must be at least 6 characters');
+      return;
+    }
+
+    if (new_password != confirm_password) {
+      showToast('Confirm password did not match');
+      return;
+    }
+
+    this.setState({ is_loading: true });
+
+    const params = { old_password, new_password };
+
+    httpPost(CHANGE_PASSWORD_URL, params, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => {
+        const { message } = res;
+        this.setState({ is_loading: false });
+        setTimeout(() => showToast(message), 100);
+        this.resetForm();
+      })
+      .catch(err => {
+        this.setState({ is_loading: false });
+        setTimeout(() => showToast(err.error), 100);
+      });
+  };
+
   render() {
+    const {
+      old_password,
+      new_password,
+      confirm_password,
+      is_loading,
+    } = this.state;
+
     return (
-      <View style={styles.container}>
-        <View>
-          <Text style={GlobalStyles.largeText}>Change Password</Text>
-        </View>
-        <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Old Password"
-              autoCapitalize="none"
-              onChangeText={value => {
-                this.setState({ username: value });
-              }}
-              underlineColorAndroid="transparent"
-            />
+      <>
+        <Spinner visible={is_loading} color="#8c1d1a" />
+
+        <View style={styles.container}>
+          <View>
+            <Text style={GlobalStyles.largeText}>Change Password</Text>
           </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="New Password"
-              secureTextEntry={true}
-              autoCompleteType="password"
-              onChangeText={value => {
-                this.setState({ password: value });
-              }}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Confirm Password"
-              secureTextEntry={true}
-              autoCompleteType="password"
-              onChangeText={value => {
-                this.setState({ password: value });
-              }}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <TouchableOpacity
-            onPress={this.handleLoginRequest}
-            style={styles.button}
-          >
-            <View>
-              <Text style={GlobalStyles.buttonText}>Change Password</Text>
+
+          <View style={styles.formContainer}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.textInput}
+                value={old_password}
+                placeholder="Old Password"
+                secureTextEntry={true}
+                autoCapitalize="none"
+                onChangeText={value => {
+                  this.setState({ old_password: value });
+                }}
+                underlineColorAndroid="transparent"
+              />
             </View>
-          </TouchableOpacity>
+
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="New Password"
+                secureTextEntry={true}
+                autoCompleteType="password"
+                value={new_password}
+                onChangeText={value => {
+                  this.setState({ new_password: value });
+                }}
+                underlineColorAndroid="transparent"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.textInput}
+                value={confirm_password}
+                placeholder="Confirm Password"
+                secureTextEntry={true}
+                autoCompleteType="password"
+                onChangeText={value => {
+                  this.setState({ confirm_password: value });
+                }}
+                underlineColorAndroid="transparent"
+              />
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={this.handleChangePasswordRequest}
+              style={styles.button}
+            >
+              <View>
+                <Text style={GlobalStyles.buttonText}>Change Password</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </>
     );
   }
 }
@@ -112,9 +207,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   formContainer: {
-    height: 230,
     alignItems: 'center',
     backgroundColor: 'white',
+    paddingTop: 20,
     paddingHorizontal: 20,
   },
 
