@@ -73,4 +73,7 @@ export default StyleSheet.create({
     borderRadius: 5,
     right: 20,
   },
+  menuText: {
+    color: '#808080',
+  },
 });

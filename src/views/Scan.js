@@ -5,77 +5,95 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
-import Menu from '../components/Menu';
+import { showToast } from '../utils/helper';
+import HeaderMenu from '../components/HeaderMenu';
 
 export default class Scan extends Component {
-  state = {
-    shelf_no: '',
+  static navigationOptions = ({ navigation }) => {
+    const {
+      state: {
+        params: { type },
+      },
+      navigate,
+    } = navigation;
+
+    return {
+      headerRight: (
+        <View style={GlobalStyles.headerRightContainer}>
+          <TouchableOpacity
+            onPress={() =>
+              navigate('Scan', { type: type == 'shelf' ? 'book' : 'shelf' })
+            }
+            style={GlobalStyles.headerRightButton}
+          >
+            <View>
+              <Text style={GlobalStyles.buttonText}>
+                Scan a {type == 'shelf' ? 'Book' : 'Shelf'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <HeaderMenu navigate={navigate} />
+        </View>
+      ),
+    };
   };
 
-  static navigationOptions = {
-    headerRight: (
-      <View style={GlobalStyles.headerRightContainer}>
-        <TouchableOpacity
-          onPress={this._onPressButton}
-          style={GlobalStyles.headerRightButton}
-        >
-          <View>
-            <Text style={GlobalStyles.buttonText}>Scan a Book</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this._onPressButton}>
-          <Icon name="more-vert" color="#fff" />
-        </TouchableOpacity>
-      </View>
-    ),
+  state = {
+    number: '',
   };
 
   /**
    * Handles scan shelf
    */
-  scanShelf = () => {
-    const { shelf_no } = this.state;
+  scanEntity = () => {
+    const { number } = this.state;
+
     const {
+      navigation,
       navigation: { navigate },
     } = this.props;
 
-    if (!shelf_no) {
-      Alert.alert('Please enter shelf no to scan.');
+    const type = navigation.getParam('type');
+
+    if (!number) {
+      showToast(`Please enter ${type} no to scan.`);
       return;
     }
-
-    navigate('ScanShelf', {
-      shelf_no,
-    });
+    if (type == 'book') {
+      navigate('BookDetail', { number });
+    } else {
+      navigate('ScanShelf', { number });
+    }
   };
 
   render() {
-    const { shelf_no } = this.state;
+    const { navigation } = this.props;
+    const { number } = this.state;
+    const type = navigation.getParam('type');
 
     return (
       <>
         <View style={styles.mainContainer}>
           <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
             <TextInput
-              placeholder="Enter Shelf Number"
+              placeholder={`Enter ${type == 'book' ? 'Book' : 'Shelf'}  Number`}
               underlineColorAndroid="transparent"
               style={[styles.textInput]}
               autoCapitalize="none"
-              value={shelf_no}
+              value={number}
               onChangeText={value => {
-                this.setState({ shelf_no: value });
+                this.setState({ number: value });
               }}
             />
-            <TouchableOpacity onPress={() => this.scanShelf()}>
+            <TouchableOpacity onPress={() => this.scanEntity()}>
               <Icon name="send" color="#8c1d1a" />
             </TouchableOpacity>
           </View>
         </View>
-        {false && <Menu />}
       </>
     );
   }
@@ -85,5 +103,4 @@ const styles = StyleSheet.create({
   inputContainer: {
     justifyContent: 'space-between',
   },
-  textInput: {},
 });

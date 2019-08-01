@@ -23,7 +23,7 @@ export default class Home extends Component {
             </View>
 
             <TouchableOpacity
-              onPress={this._onPressButton}
+              onPress={() => navigate('Scan', { type: 'book' })}
               style={GlobalStyles.button}
             >
               <View>
@@ -32,7 +32,7 @@ export default class Home extends Component {
             </TouchableOpacity>
             <View style={GlobalStyles.verticalSpace} />
             <TouchableOpacity
-              onPress={() => navigate('Scan')}
+              onPress={() => navigate('Scan', { type: 'shelf' })}
               style={GlobalStyles.button}
             >
               <View>
