@@ -254,6 +254,9 @@ class ScanShelf extends Component {
 }
 
 const styles = StyleSheet.create({
+  textInput: {
+    flex: 1,
+  },
   mainContainer: {
     flex: 1,
     flexDirection: 'column',

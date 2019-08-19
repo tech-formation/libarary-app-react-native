@@ -192,6 +192,9 @@ export default class Scan extends Component {
 }
 
 const styles = StyleSheet.create({
+  textInput: {
+    flex: 1,
+  },
   inputContainer: {
     justifyContent: 'space-between',
   },
