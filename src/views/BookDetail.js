@@ -53,9 +53,8 @@ export default class BookDetail extends Component {
       const token = await AsyncStorage.getItem('token');
       if (token != null) {
         const { navigation } = this.props;
-        const book_no = navigation.getParam('book_no');
-        this.setState({ token, book_no });
-        this.scanBook();
+        const book = navigation.getParam('book');
+        this.setState({ token, book });
       } else {
         navigate('Login');
       }
@@ -91,7 +90,7 @@ export default class BookDetail extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error), 100);
+        setTimeout(() => showToast(err.error.message), 100);
       });
   };
 

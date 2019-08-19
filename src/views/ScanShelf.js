@@ -58,8 +58,12 @@ class ScanShelf extends Component {
       if (token != null) {
         this.setState({ token });
         const { navigation } = this.props;
-        const shelf_no = navigation.getParam('shelf_no');
-        this.scanShelf(shelf_no);
+        const shelf_data = navigation.getParam('shelf_data');
+        this.setState({ missing: shelf_data });
+        setTimeout(() => {
+          this.updateTabs();
+          this.setState({ is_loading: false });
+        }, 100);
       } else {
         navigate('Login');
       }
@@ -125,7 +129,7 @@ class ScanShelf extends Component {
         })
         .catch(err => {
           this.setState({ is_loading: false });
-          setTimeout(() => showToast(err.error), 100);
+          setTimeout(() => showToast(err.error.message), 200);
         });
     }
   };
@@ -158,7 +162,7 @@ class ScanShelf extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error), 100);
+        setTimeout(() => showToast(err.error.message), 100);
       });
   };
 
