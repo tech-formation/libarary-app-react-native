@@ -84,7 +84,7 @@ export default class ChangePassword extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error), 100);
+        setTimeout(() => showToast(err.error.message), 100);
       });
   };
 
