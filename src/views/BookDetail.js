@@ -53,9 +53,8 @@ export default class BookDetail extends Component {
       const token = await AsyncStorage.getItem('token');
       if (token != null) {
         const { navigation } = this.props;
-        const book_no = navigation.getParam('book_no');
-        this.setState({ token, book_no });
-        this.scanBook();
+        const book = navigation.getParam('book');
+        this.setState({ token, book });
       } else {
         navigate('Login');
       }
@@ -91,7 +90,7 @@ export default class BookDetail extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error), 100);
+        setTimeout(() => showToast(err.error.message), 100);
       });
   };
 
@@ -179,15 +178,16 @@ const styles = StyleSheet.create({
   detailsContainer: {
     height: '100%',
     backgroundColor: '#fafafa',
-    margin: 20,
+    margin: 10,
   },
   detailsTopRow: {
-    flex: 0.13,
+    flex: 0.15,
     flexDirection: 'row',
     paddingTop: 10,
   },
   detailImageContainer: {
     flex: 0.3,
+    marginLeft: 25,
   },
   booksImage: {
     width: 77,
@@ -208,16 +208,19 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   detailMidRow: {
-    flex: 0.03,
+    flex: 0.04,
     flexDirection: 'row',
     justifyContent: 'center',
+    paddingTop: 5,
   },
   detailBottomRow: {
     flex: 0.5,
     flexDirection: 'column',
     alignItems: 'center',
   },
-  textInput: {},
+  textInput: {
+    flex: 1,
+  },
   paddingLeft10: {
     paddingLeft: 10,
   },
