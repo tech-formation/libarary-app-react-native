@@ -178,15 +178,16 @@ const styles = StyleSheet.create({
   detailsContainer: {
     height: '100%',
     backgroundColor: '#fafafa',
-    margin: 20,
+    margin: 10,
   },
   detailsTopRow: {
-    flex: 0.13,
+    flex: 0.15,
     flexDirection: 'row',
     paddingTop: 10,
   },
   detailImageContainer: {
     flex: 0.3,
+    marginLeft: 25,
   },
   booksImage: {
     width: 77,
@@ -207,9 +208,10 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   detailMidRow: {
-    flex: 0.03,
+    flex: 0.04,
     flexDirection: 'row',
     justifyContent: 'center',
+    paddingTop: 5,
   },
   detailBottomRow: {
     flex: 0.5,

@@ -52,6 +52,7 @@ class ScanShelf extends Component {
   }
 
   getToken = async () => {
+    this.setState({ is_loading: true });
     const { navigate } = this.props.navigation;
     try {
       const token = await AsyncStorage.getItem('token');
@@ -59,7 +60,7 @@ class ScanShelf extends Component {
         this.setState({ token });
         const { navigation } = this.props;
         const shelf_data = navigation.getParam('shelf_data');
-        this.setState({ missing: shelf_data });
+        this.setState({ missing: shelf_data, index: 2 });
         setTimeout(() => {
           this.updateTabs();
           this.setState({ is_loading: false });
@@ -69,6 +70,7 @@ class ScanShelf extends Component {
       }
     } catch (e) {
       // showToast(e);
+      this.setState({ is_loading: false });
     }
   };
 
