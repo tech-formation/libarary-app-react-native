@@ -110,6 +110,11 @@ class Login extends Component {
                   placeholder="Username"
                   value={username}
                   autoCapitalize="none"
+                  blurOnSubmit={false}
+                  returnKeyType={'next'}
+                  onSubmitEditing={() => {
+                    this.password.focus();
+                  }}
                   onChangeText={value => {
                     this.setState({ username: value });
                   }}
@@ -128,8 +133,12 @@ class Login extends Component {
                   value={password}
                   secureTextEntry={true}
                   autoCompleteType="password"
+                  returnKeyType={'done'}
                   onChangeText={value => {
                     this.setState({ password: value });
+                  }}
+                  ref={input => {
+                    this.password = input;
                   }}
                   underlineColorAndroid="transparent"
                 />
@@ -192,7 +201,7 @@ const MainNavigator = createStackNavigator(
     ChangePassword: { screen: ChangePassword },
   },
   {
-    initialRouteName: 'Login',
+    initialRouteName: 'Home',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',

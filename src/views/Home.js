@@ -1,9 +1,74 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Animated,
+  BackHandler,
+} from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
+import AsyncStorage from '@react-native-community/async-storage';
+import { showToast } from '../utils/helper';
 
 export default class Home extends Component {
   static navigationOptions = { header: null };
+
+  state = {
+    token: '',
+    backClickCount: 0,
+  };
+
+  constructor(props) {
+    super(props);
+
+    this.springValue = new Animated.Value(100);
+  }
+
+  componentWillMount() {
+    BackHandler.addEventListener(
+      'hardwareBackPress',
+      this.handleBackButton.bind(this)
+    );
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener(
+      'hardwareBackPress',
+      this.handleBackButton.bind(this)
+    );
+  }
+
+  timeout() {
+    showToast('Press back again to exit the app');
+    this.setState({ backClickCount: 1 });
+    setTimeout(() => this.setState({ backClickCount: 0 }), 1000);
+  }
+
+  handleBackButton = () => {
+    this.state.backClickCount == 1 ? BackHandler.exitApp() : this.timeout();
+
+    return true;
+  };
+
+  componentDidMount() {
+    this.getToken();
+  }
+
+  getToken = async () => {
+    const { navigate } = this.props.navigation;
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token != null) {
+        this.setState({ token });
+      } else {
+        navigate('Login');
+      }
+    } catch (e) {
+      // showToast(e);
+    }
+  };
 
   render() {
     const { navigate } = this.props.navigation;
