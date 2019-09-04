@@ -1,4 +1,4 @@
-export const BASE_API_URL = 'http://lma.clientreviews.info/api/';
+export const BASE_API_URL = 'http://library.vuwork.com/api/';
 export const LOGIN_API_URL = `${BASE_API_URL}users/login`;
 export const SCAN_SHELF_URL = `${BASE_API_URL}shelve/fetch/#ID#?includes=books`;
 export const FETCH_BOOK_URL = `${BASE_API_URL}book/fetch/#ID#`;
