@@ -20,6 +20,10 @@ import AsyncStorage from '@react-native-community/async-storage';
 import HeaderMenu from '../components/HeaderMenu';
 
 class ScanShelf extends Component {
+  constructor(props) {
+    super(props);
+    this.input = React.createRef();
+  }
   state = {
     is_loading: false,
     token: '',
@@ -79,7 +83,7 @@ class ScanShelf extends Component {
    */
   isExistInArray = (stack, needle) => {
     return stack.find(book => {
-      return book.book_id == needle.book_id;
+      return book.barcode == needle.barcode;
     });
   };
 
@@ -92,7 +96,7 @@ class ScanShelf extends Component {
     const { missing, actual, extra, token } = this.state;
 
     const scanned = [...missing, ...actual].find(book => {
-      return book.book_id == book_no;
+      return book.barcode == book_no;
     });
 
     if (scanned) {
@@ -106,7 +110,10 @@ class ScanShelf extends Component {
 
       this.setState({ missing: missing_copy, actual: actual_copy, index: 0 });
 
-      setTimeout(() => this.updateTabs(), 100);
+      setTimeout(() => {
+        this.updateTabs();
+        this.input.focus();
+      }, 100);
     } else {
       let url = FETCH_BOOK_URL;
       url = url.replace(/#ID#/g, book_no);
@@ -127,11 +134,13 @@ class ScanShelf extends Component {
           setTimeout(() => {
             this.updateTabs();
             this.setState({ is_loading: false });
+            this.input.focus();
           }, 100);
         })
         .catch(err => {
           this.setState({ is_loading: false });
           setTimeout(() => showToast(err.error.message), 200);
+          this.input.focus();
         });
     }
   };
@@ -205,6 +214,11 @@ class ScanShelf extends Component {
 
         <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
           <TextInput
+            ref={input => {
+              this.input = input;
+            }}
+            selectTextOnFocus={true}
+            blurOnSubmit={false}
             value={book_no}
             autoCapitalize="none"
             onChangeText={value => {

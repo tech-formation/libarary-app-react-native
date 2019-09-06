@@ -18,6 +18,10 @@ import { showToast } from '../utils/helper';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class BookDetail extends Component {
+  constructor(props) {
+    super(props);
+    this.input = React.createRef();
+  }
   state = {
     is_loading: false,
     book_no: '',
@@ -87,10 +91,12 @@ export default class BookDetail extends Component {
       .then(res => {
         const { data } = res;
         this.setState({ is_loading: false, book: { ...data } });
+        this.input.focus();
       })
       .catch(err => {
         this.setState({ is_loading: false });
         setTimeout(() => showToast(err.error.message), 100);
+        this.input.focus();
       });
   };
 
@@ -104,6 +110,10 @@ export default class BookDetail extends Component {
         <View style={styles.mainContainer}>
           <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
             <TextInput
+              ref={input => {
+                this.input = input;
+              }}
+              selectTextOnFocus={true}
               placeholder="Enter Book Number"
               underlineColorAndroid="transparent"
               style={[styles.textInput]}
@@ -154,15 +164,6 @@ export default class BookDetail extends Component {
                 survived not only five centuries, but also the leap into
                 electronic typesetting, remaining essentially unchanged.
               </Text>
-
-              {/* <TouchableOpacity
-                onPress={this._onPressButton}
-                style={styles.scanBookButton}
-              >
-                <View>
-                  <Text style={styles.scanBookText}>SCAN OTHER BOOK</Text>
-                </View>
-              </TouchableOpacity> */}
             </View>
           </View>
         </View>
