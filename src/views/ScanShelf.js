@@ -113,6 +113,7 @@ class ScanShelf extends Component {
       setTimeout(() => {
         this.updateTabs();
         this.input.focus();
+        this.input.clear();
       }, 100);
     } else {
       let url = FETCH_BOOK_URL;
@@ -134,6 +135,7 @@ class ScanShelf extends Component {
           setTimeout(() => {
             this.updateTabs();
             this.setState({ is_loading: false });
+            this.input.clear();
             this.input.focus();
           }, 100);
         })

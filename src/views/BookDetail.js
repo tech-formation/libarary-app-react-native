@@ -91,6 +91,7 @@ export default class BookDetail extends Component {
       .then(res => {
         const { data } = res;
         this.setState({ is_loading: false, book: { ...data } });
+        this.input.clear();
         this.input.focus();
       })
       .catch(err => {

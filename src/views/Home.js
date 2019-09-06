@@ -5,7 +5,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Animated,
   BackHandler,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
@@ -20,17 +19,13 @@ export default class Home extends Component {
     backClickCount: 0,
   };
 
-  constructor(props) {
-    super(props);
+  componentDidMount() {
+    this.getToken();
 
-    this.springValue = new Animated.Value(100);
-  }
-
-  componentWillMount() {
-    BackHandler.addEventListener(
-      'hardwareBackPress',
-      this.handleBackButton.bind(this)
-    );
+    // BackHandler.addEventListener(
+    //   'hardwareBackPress',
+    //   this.handleBackButton.bind(this)
+    // );
   }
 
   componentWillUnmount() {
@@ -51,10 +46,6 @@ export default class Home extends Component {
 
     return true;
   };
-
-  componentDidMount() {
-    this.getToken();
-  }
 
   getToken = async () => {
     const { navigate } = this.props.navigation;

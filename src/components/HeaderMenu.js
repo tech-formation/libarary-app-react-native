@@ -26,6 +26,12 @@ class HeaderMenu extends React.Component {
     this.menu.hide();
   };
 
+  logout = () => {
+    const { navigate } = this.props;
+    navigate('Login');
+    this.menu.hide();
+  };
+
   showMenu = () => {
     this.menu.show();
   };
@@ -45,7 +51,7 @@ class HeaderMenu extends React.Component {
             <VectorIcon name="lock" size={12} color="#808080" />
             <Text> Change Password</Text>
           </MenuItem>
-          <MenuItem onPress={this.hideMenu} textStyle={GlobalStyles.menuText}>
+          <MenuItem onPress={this.logout} textStyle={GlobalStyles.menuText}>
             <VectorIcon name="exit-to-app" size={12} color="#808080" />
             <Text> Logout</Text>
           </MenuItem>
