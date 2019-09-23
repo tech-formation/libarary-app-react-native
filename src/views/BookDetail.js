@@ -96,7 +96,7 @@ export default class BookDetail extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error.message), 100);
+        setTimeout(() => showToast(err), 100);
         this.input.focus();
       });
   };

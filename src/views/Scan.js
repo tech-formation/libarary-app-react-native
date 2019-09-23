@@ -16,6 +16,11 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class Scan extends Component {
+  constructor(props) {
+    super(props);
+    this.input = React.createRef();
+  }
+
   static navigationOptions = ({ navigation }) => {
     const {
       state: {
@@ -123,7 +128,8 @@ export default class Scan extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error.message), 100);
+        setTimeout(() => showToast(err), 100);
+        this.input.focus();
       });
   };
 
@@ -155,7 +161,8 @@ export default class Scan extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error.message), 100);
+        setTimeout(() => showToast(err), 100);
+        this.input.focus();
       });
   };
 
@@ -170,6 +177,9 @@ export default class Scan extends Component {
         <View style={styles.mainContainer}>
           <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
             <TextInput
+              ref={input => {
+                this.input = input;
+              }}
               placeholder={`Enter ${type == 'book' ? 'Book' : 'Shelf'}  Number`}
               underlineColorAndroid="transparent"
               style={[styles.textInput]}
@@ -179,6 +189,7 @@ export default class Scan extends Component {
               onChangeText={value => {
                 this.setState({ number: value });
               }}
+              autoFocus={true}
               onSubmitEditing={this.scanEntity}
             />
             <TouchableOpacity onPress={() => this.scanEntity()}>

@@ -141,7 +141,7 @@ class ScanShelf extends Component {
         })
         .catch(err => {
           this.setState({ is_loading: false });
-          setTimeout(() => showToast(err.error.message), 200);
+          setTimeout(() => showToast(err), 200);
           this.input.focus();
         });
     }
@@ -175,7 +175,7 @@ class ScanShelf extends Component {
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error.message), 100);
+        setTimeout(() => showToast(err), 100);
       });
   };
 

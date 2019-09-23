@@ -219,8 +219,24 @@ export const httpHandleResponse = res => {
  * @return {Object|String|Null}
  */
 export const httpHandleError = error => {
-  console.log('-- HTTP HANDLE ERROR -- ', error.response);
-  return Promise.reject(error.response.data);
+  const xhr = error.request;
+  let message = 'Internal server error!';
+  if (xhr) {
+    switch (xhr.status) {
+      case 0:
+        message = 'Please check your internet connection!';
+        break;
+
+      case 403:
+        message = 'Token Expired!';
+        break;
+
+      default:
+        message = error.response.data.error.message;
+        break;
+    }
+  }
+  return Promise.reject(message);
 };
 
 /**
