@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, FlatList, Text, StyleSheet } from 'react-native';
 
+export const truncate = input =>
+  input.length > 45 ? `${input.substring(0, 45)}...` : input;
+
 const ListItem = ({ data }) => {
   return (
     <View style={[styles.scene]}>
@@ -9,7 +12,7 @@ const ListItem = ({ data }) => {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View key={item.book_id} style={styles.listItem}>
-            <Text style={styles.listItemTitle}>{item.title}</Text>
+            <Text style={styles.listItemTitle}>{truncate(item.title)}</Text>
             <View style={[styles.listItemDetails, styles.inlineFlow]}>
               <View style={styles.inlineFlow}>
                 <Text style={styles.listItemLabel}>By: </Text>
@@ -17,9 +20,21 @@ const ListItem = ({ data }) => {
               </View>
               <View style={styles.inlineFlow}>
                 <Text style={[styles.listItemLabel, styles.leftPadding20]}>
-                  ISBN:{' '}
+                  Staff Note:{' '}
                 </Text>
-                <Text style={styles.listItemText}>{item.isbn_number}</Text>
+                <Text style={styles.listItemText}>{item.staff_note}</Text>
+              </View>
+            </View>
+            <View style={[styles.listItemDetails, styles.inlineFlow]}>
+              <View style={styles.inlineFlow}>
+                <Text style={[styles.listItemLabel]}>Location: </Text>
+                <Text style={styles.listItemText}>{item.location}</Text>
+              </View>
+              <View style={styles.inlineFlow}>
+                <Text style={[styles.listItemLabel, styles.leftPadding20]}>
+                  BIB:{' '}
+                </Text>
+                <Text style={styles.listItemText}>{item.bib_id}</Text>
               </View>
             </View>
           </View>
@@ -39,7 +54,7 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     borderBottomWidth: 0.5,
     borderBottomColor: '#a9a9a9',
-    height: 60,
+    height: 90,
   },
   listItemTitle: {
     flex: 0.6,

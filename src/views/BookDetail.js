@@ -142,18 +142,32 @@ export default class BookDetail extends Component {
               <View style={styles.titleContainer}>
                 <Text style={styles.bookTitle}>{book.title}</Text>
                 <Text style={styles.bookSubTitle}>By: {book.author}</Text>
-                <Text style={styles.bookSubTitle}>
-                  ISBN: {book.isbn_number}
-                </Text>
+                <Text style={styles.bookSubTitle}>Barcode: {book.barcode}</Text>
               </View>
             </View>
             <View style={styles.detailMidRow}>
-              <Text style={styles.bookSubTitle}>Shelf No: {book.shelf_id}</Text>
-              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
-                Row No: 2
+              <Text style={styles.bookSubTitle}>
+                Staff Note: {book.staff_note}
               </Text>
               <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
-                Column: 4
+                Rack: {book.rack}
+              </Text>
+              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
+                Side: {book.side}
+              </Text>
+            </View>
+            <View style={styles.detailMidRow}>
+              <Text style={styles.bookSubTitle}>Location: {book.location}</Text>
+              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
+                BIB: {book.bib_id}
+              </Text>
+            </View>
+            <View style={styles.detailMidRow}>
+              <Text style={styles.bookSubTitle}>
+                Call No.: {book.call_number}
+              </Text>
+              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
+                Coy No.: {book.copy_number}
               </Text>
             </View>
             <View style={styles.detailBottomRow}>

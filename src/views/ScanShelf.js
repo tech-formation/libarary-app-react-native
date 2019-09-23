@@ -18,6 +18,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { showToast } from '../utils/helper';
 import AsyncStorage from '@react-native-community/async-storage';
 import HeaderMenu from '../components/HeaderMenu';
+import Sound from 'react-native-sound';
 
 class ScanShelf extends Component {
   constructor(props) {
@@ -54,6 +55,19 @@ class ScanShelf extends Component {
   componentDidMount() {
     this.getToken();
   }
+
+  /**
+   * Play Beep
+   */
+  playSound = name => {
+    const sound = new Sound(`${name}.mp3`, null, error => {
+      // if (error) {
+      //   console.log(error);
+      // }
+      // play when loaded
+      sound.play();
+    });
+  };
 
   getToken = async () => {
     this.setState({ is_loading: true });
@@ -114,6 +128,7 @@ class ScanShelf extends Component {
         this.updateTabs();
         this.input.focus();
         this.input.clear();
+        this.playSound('found');
       }, 100);
     } else {
       let url = FETCH_BOOK_URL;
@@ -135,6 +150,7 @@ class ScanShelf extends Component {
           setTimeout(() => {
             this.updateTabs();
             this.setState({ is_loading: false });
+            this.playSound('not_found');
             this.input.clear();
             this.input.focus();
           }, 100);
@@ -143,6 +159,7 @@ class ScanShelf extends Component {
           this.setState({ is_loading: false });
           setTimeout(() => showToast(err), 200);
           this.input.focus();
+          this.playSound('not_found');
         });
     }
   };
