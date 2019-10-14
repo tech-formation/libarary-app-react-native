@@ -29,11 +29,6 @@ export default class Home extends Component {
   };
 
   componentDidMount() {
-    this.setState({
-      selected_language: '',
-      selected_rack: '',
-      selected_side: '',
-    });
     this.getDb();
   }
 
