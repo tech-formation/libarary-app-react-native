@@ -10,7 +10,7 @@ export default StyleSheet.create({
   },
   contentContainer: {
     width: 300,
-    height: 400,
+    height: 500,
   },
   logoContainer: {
     flex: 0.2,
@@ -50,6 +50,11 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+  },
+  select: {
+    width: 200,
+    height: 40,
+    top: 20,
   },
   buttonText: {
     color: '#fff',

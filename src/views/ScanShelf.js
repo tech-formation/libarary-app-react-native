@@ -33,6 +33,12 @@ class ScanShelf extends Component {
     actual: [],
     extra: [],
     index: 0,
+    db: {
+      languages: [],
+      books: [],
+      sides: [],
+      racks: [],
+    },
     routes: [
       { key: 'actual', title: 'Actual (0/0)' },
       { key: 'extra', title: 'Extra (0)' },
@@ -54,31 +60,31 @@ class ScanShelf extends Component {
 
   componentDidMount() {
     this.getToken();
+    this.getDb();
   }
 
-  /**
-   * Play Beep
-   */
-  playSound = name => {
-    const sound = new Sound(`${name}.mp3`, null, error => {
-      // if (error) {
-      //   console.log(error);
-      // }
-      // play when loaded
-      sound.play();
-    });
-  };
-
-  getToken = async () => {
-    this.setState({ is_loading: true });
+  getDb = async () => {
     const { navigate } = this.props.navigation;
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (token != null) {
-        this.setState({ token });
+      const db = await AsyncStorage.getItem('lib_db');
+
+      if (db != null) {
+        this.setState({ db: JSON.parse(db) });
+        const { books } = JSON.parse(db);
+
         const { navigation } = this.props;
-        const shelf_data = navigation.getParam('shelf_data');
+        const lang = navigation.getParam('lang');
+        const rack = navigation.getParam('rack');
+        const side = navigation.getParam('side');
+        const shelf_data = books.filter(
+          book =>
+            book.language_id == lang &&
+            book.rack_id == rack &&
+            book.side_id == side
+        );
+
         this.setState({ missing: shelf_data, index: 2 });
+
         setTimeout(() => {
           this.updateTabs();
           this.setState({ is_loading: false });
@@ -88,7 +94,29 @@ class ScanShelf extends Component {
       }
     } catch (e) {
       // showToast(e);
-      this.setState({ is_loading: false });
+    }
+  };
+
+  /**
+   * Play Beep
+   */
+  playSound = name => {
+    const sound = new Sound(`${name}.mp3`, null, error => {
+      sound.play(() => sound.release());
+    });
+  };
+
+  getToken = async () => {
+    const { navigate } = this.props.navigation;
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token != null) {
+        this.setState({ token });
+      } else {
+        navigate('Login');
+      }
+    } catch (e) {
+      // showToast(e);
     }
   };
 
@@ -107,7 +135,12 @@ class ScanShelf extends Component {
   scanBook = book_no => {
     if (!book_no) Alert.alert('Please enter Book Number to scan');
 
-    const { missing, actual, extra, token } = this.state;
+    const {
+      missing,
+      actual,
+      extra,
+      db: { books },
+    } = this.state;
 
     const scanned = [...missing, ...actual].find(book => {
       return book.barcode == book_no;
@@ -131,36 +164,52 @@ class ScanShelf extends Component {
         this.playSound('found');
       }, 100);
     } else {
-      let url = FETCH_BOOK_URL;
-      url = url.replace(/#ID#/g, book_no);
-      this.setState({ is_loading: true });
-      httpGet(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(res => {
-          const { data } = res;
-          const extra_copy = [...extra];
+      const extra_book = books.find(book => {
+        return book.barcode == book_no;
+      });
 
-          if (!this.isExistInArray(extra_copy, data)) extra_copy.push(data);
-
-          this.setState({ extra: extra_copy, index: 1 });
-
-          setTimeout(() => {
-            this.updateTabs();
-            this.setState({ is_loading: false });
-            this.playSound('not_found');
-            this.input.clear();
-            this.input.focus();
-          }, 100);
-        })
-        .catch(err => {
-          this.setState({ is_loading: false });
-          setTimeout(() => showToast(err), 200);
-          this.input.focus();
+      if (extra_book) {
+        const extra_copy = [...extra];
+        extra_copy.push(extra_book);
+        this.setState({ extra: extra_copy, index: 1 });
+        setTimeout(() => {
+          this.updateTabs();
           this.playSound('not_found');
-        });
+          this.input.clear();
+          this.input.focus();
+        }, 100);
+      } else {
+        this.input.focus();
+        this.playSound('not_found');
+      }
+
+      // let url = FETCH_BOOK_URL;
+      // url = url.replace(/#ID#/g, book_no);
+      // this.setState({ is_loading: true });
+      // httpGet(url, {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      // })
+      //   .then(res => {
+      //     const { data } = res;
+      //     const extra_copy = [...extra];
+      //     if (!this.isExistInArray(extra_copy, data)) extra_copy.push(data);
+      //     this.setState({ extra: extra_copy, index: 1 });
+      //     setTimeout(() => {
+      //       this.updateTabs();
+      //       this.setState({ is_loading: false });
+      //       this.playSound('not_found');
+      //       this.input.clear();
+      //       this.input.focus();
+      //     }, 100);
+      //   })
+      //   .catch(err => {
+      //     this.setState({ is_loading: false });
+      //     setTimeout(() => showToast(err), 200);
+      //     this.input.focus();
+      //     this.playSound('not_found');
+      //   });
     }
   };
 

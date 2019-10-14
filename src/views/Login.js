@@ -12,8 +12,8 @@ import { createStackNavigator, createAppContainer } from 'react-navigation';
 import Home from './Home';
 import ScanShelf from './ScanShelf';
 import Scan from './Scan';
-import { LOGIN_API_URL } from '../configs/constants';
-import { httpPost } from '../utils/http';
+import { LOGIN_API_URL, SYNC_DATA } from '../configs/constants';
+import { httpPost, httpGet } from '../utils/http';
 import AsyncStorage from '@react-native-community/async-storage';
 import { showToast } from '../utils/helper';
 import BookDetail from './BookDetail';
@@ -54,6 +54,15 @@ class Login extends Component {
     }
   };
 
+  saveDb = async db => {
+    try {
+      await AsyncStorage.setItem('lib_db', JSON.stringify(db));
+    } catch (e) {
+      console.log(e);
+      // showToast(e);
+    }
+  };
+
   handleLoginRequest = () => {
     const { username, password } = this.state;
 
@@ -72,14 +81,32 @@ class Login extends Component {
 
     httpPost(LOGIN_API_URL, params)
       .then(res => {
-        const { navigate } = this.props.navigation;
         this.saveLoggedInUserInfo(res.token, res.user);
+        this.setState({ is_loading: false });
+        this.syncData(res.token);
+      })
+      .catch(err => {
+        this.setState({ is_loading: false });
+        setTimeout(() => showToast(err.error), 100);
+      });
+  };
+
+  syncData = token => {
+    this.setState({ is_loading: true });
+    const { navigate } = this.props.navigation;
+    httpGet(SYNC_DATA, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => {
+        this.saveDb(res);
         this.setState({ is_loading: false });
         navigate('Home');
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error), 100);
+        setTimeout(() => showToast(err), 200);
       });
   };
 

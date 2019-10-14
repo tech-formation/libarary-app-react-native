@@ -5,54 +5,39 @@ import {
   View,
   Image,
   TouchableOpacity,
-  BackHandler,
+  Picker,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import AsyncStorage from '@react-native-community/async-storage';
-import { showToast } from '../utils/helper';
 
 export default class Home extends Component {
   static navigationOptions = { header: null };
 
   state = {
-    token: '',
-    backClickCount: 0,
+    selected_language: '',
+    rack_options: [],
+    selected_rack: '',
+    side_options: [],
+    selected_side: '',
+    db: {
+      languages: [],
+      books: [],
+      sides: [],
+      racks: [],
+    },
   };
 
   componentDidMount() {
-    this.getToken();
-
-    // BackHandler.addEventListener(
-    //   'hardwareBackPress',
-    //   this.handleBackButton.bind(this)
-    // );
+    this.getDb();
   }
 
-  componentWillUnmount() {
-    BackHandler.removeEventListener(
-      'hardwareBackPress',
-      this.handleBackButton.bind(this)
-    );
-  }
-
-  timeout() {
-    showToast('Press back again to exit the app');
-    this.setState({ backClickCount: 1 });
-    setTimeout(() => this.setState({ backClickCount: 0 }), 1000);
-  }
-
-  handleBackButton = () => {
-    this.state.backClickCount == 1 ? BackHandler.exitApp() : this.timeout();
-
-    return true;
-  };
-
-  getToken = async () => {
+  getDb = async () => {
     const { navigate } = this.props.navigation;
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (token != null) {
-        this.setState({ token });
+      const db = await AsyncStorage.getItem('lib_db');
+
+      if (db != null) {
+        this.setState({ db: JSON.parse(db) });
       } else {
         navigate('Login');
       }
@@ -63,6 +48,14 @@ export default class Home extends Component {
 
   render() {
     const { navigate } = this.props.navigation;
+    const {
+      selected_language,
+      selected_rack,
+      selected_side,
+      rack_options,
+      side_options,
+      db: { languages, racks, sides },
+    } = this.state;
 
     return (
       <View style={GlobalStyles.mainContainer}>
@@ -86,15 +79,89 @@ export default class Home extends Component {
                 <Text style={GlobalStyles.buttonText}>SCAN A BOOK</Text>
               </View>
             </TouchableOpacity>
+
             <View style={GlobalStyles.verticalSpace} />
-            <TouchableOpacity
-              onPress={() => navigate('Scan', { type: 'shelf' })}
-              style={GlobalStyles.button}
-            >
+
+            <View>
+              <Picker
+                selectedValue={selected_language}
+                style={GlobalStyles.select}
+                onValueChange={(v, i) => {
+                  let filtred_racks = [];
+                  if (v) {
+                    filtred_racks = racks.filter(r => r.language_id == v);
+                  }
+                  this.setState({
+                    selected_language: v,
+                    selected_rack: '',
+                    selected_side: '',
+                    rack_options: filtred_racks,
+                  });
+                }}
+              >
+                <Picker.Item label="Select Language" value="" />
+                {languages.map(obj => (
+                  <Picker.Item key={obj.id} label={obj.name} value={obj.id} />
+                ))}
+              </Picker>
+            </View>
+
+            {Boolean(selected_language) && (
               <View>
-                <Text style={GlobalStyles.buttonText}>SCAN A SHELF</Text>
+                <Picker
+                  selectedValue={selected_rack}
+                  style={GlobalStyles.select}
+                  onValueChange={(v, i) => {
+                    let filtred_sides = [];
+                    if (v) {
+                      filtred_sides = sides.filter(r => r.rack_id == v);
+                    }
+                    this.setState({
+                      selected_rack: v,
+                      selected_side: '',
+                      side_options: filtred_sides,
+                    });
+                  }}
+                >
+                  <Picker.Item label="Select Rack" value="" />
+                  {rack_options.map(obj => (
+                    <Picker.Item key={obj.id} label={obj.name} value={obj.id} />
+                  ))}
+                </Picker>
               </View>
-            </TouchableOpacity>
+            )}
+
+            {Boolean(selected_rack) && (
+              <View>
+                <Picker
+                  selectedValue={selected_side}
+                  style={GlobalStyles.select}
+                  onValueChange={(v, i) => this.setState({ selected_side: v })}
+                >
+                  <Picker.Item label="Select Side" value="" />
+                  {side_options.map(obj => (
+                    <Picker.Item key={obj.id} label={obj.name} value={obj.id} />
+                  ))}
+                </Picker>
+              </View>
+            )}
+
+            {Boolean(selected_side) && (
+              <TouchableOpacity
+                onPress={() =>
+                  navigate('ScanShelf', {
+                    lang: selected_language,
+                    rack: selected_rack,
+                    side: selected_side,
+                  })
+                }
+                style={GlobalStyles.button}
+              >
+                <View>
+                  <Text style={GlobalStyles.buttonText}>SCAN SHELF</Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>

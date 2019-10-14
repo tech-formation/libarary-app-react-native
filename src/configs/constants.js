@@ -2,6 +2,7 @@ export const BASE_API_URL = 'http://library.vuwork.com/api/';
 export const LOGIN_API_URL = `${BASE_API_URL}users/login`;
 export const SCAN_SHELF_URL = `${BASE_API_URL}shelve/fetch/#ID#?includes=books`;
 export const FETCH_BOOK_URL = `${BASE_API_URL}book/fetch/#ID#`;
+export const SYNC_DATA = `${BASE_API_URL}sync-data`;
 export const CHANGE_PASSWORD_URL = `${BASE_API_URL}users/change_password`;
 
 export const TEMP_TOKEN =
