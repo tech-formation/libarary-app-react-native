@@ -11,7 +11,7 @@ import {
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { httpGet } from '../utils/http';
-import { SCAN_SHELF_URL, FETCH_BOOK_URL } from '../configs/constants';
+import { SCAN_SHELF_URL } from '../configs/constants';
 import { Icon } from 'react-native-elements';
 import ListItem from '../components/ListItem';
 import Spinner from 'react-native-loading-spinner-overlay';

@@ -12,9 +12,6 @@ import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
 import HeaderMenu from '../components/HeaderMenu';
 import AsyncStorage from '@react-native-community/async-storage';
-import { FETCH_BOOK_URL } from '../configs/constants';
-import { httpGet } from '../utils/http';
-import { showToast } from '../utils/helper';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 export default class BookDetail extends Component {
@@ -26,6 +23,7 @@ export default class BookDetail extends Component {
     is_loading: false,
     book_no: '',
     token: '',
+    books: [],
     book: {
       shelf_id: '',
       isbn_number: '',
@@ -48,17 +46,17 @@ export default class BookDetail extends Component {
   };
 
   componentDidMount() {
-    this.getToken();
+    this.getDb();
   }
 
-  getToken = async () => {
+  getDb = async () => {
     const { navigate } = this.props.navigation;
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (token != null) {
-        const { navigation } = this.props;
-        const book = navigation.getParam('book');
-        this.setState({ token, book });
+      const db = await AsyncStorage.getItem('lib_db');
+
+      if (db != null) {
+        const { books } = JSON.parse(db);
+        this.setState({ books });
       } else {
         navigate('Login');
       }
@@ -71,34 +69,24 @@ export default class BookDetail extends Component {
    * Handles scan shelf
    */
   scanBook = () => {
-    const { book_no } = this.state;
-    const { token } = this.state;
+    const { book_no, books } = this.state;
 
     if (!book_no) {
       Alert.alert('Please enter book no to scan.');
       return;
     }
 
-    let url = FETCH_BOOK_URL;
-    url = url.replace(/#ID#/g, book_no);
     this.setState({ is_loading: true });
+    const book = books.find(b => b.barcode == book_no);
 
-    httpGet(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => {
-        const { data } = res;
-        this.setState({ is_loading: false, book: { ...data } });
-        this.input.clear();
-        this.input.focus();
-      })
-      .catch(err => {
-        this.setState({ is_loading: false });
-        setTimeout(() => showToast(err), 100);
-        this.input.focus();
-      });
+    if (book) {
+      this.setState({ is_loading: false, book });
+      this.input.clear();
+      this.input.focus();
+    } else {
+      this.setState({ is_loading: false });
+      this.input.focus();
+    }
   };
 
   render() {

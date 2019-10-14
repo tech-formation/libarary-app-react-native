@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import AsyncStorage from '@react-native-community/async-storage';
+import { showToast } from '../utils/helper';
 
 export default class Home extends Component {
   static navigationOptions = { header: null };
@@ -28,6 +29,11 @@ export default class Home extends Component {
   };
 
   componentDidMount() {
+    this.setState({
+      selected_language: '',
+      selected_rack: '',
+      selected_side: '',
+    });
     this.getDb();
   }
 
@@ -54,7 +60,7 @@ export default class Home extends Component {
       selected_side,
       rack_options,
       side_options,
-      db: { languages, racks, sides },
+      db: { languages, racks, sides, books },
     } = this.state;
 
     return (
@@ -72,7 +78,13 @@ export default class Home extends Component {
             </View>
 
             <TouchableOpacity
-              onPress={() => navigate('Scan', { type: 'book' })}
+              onPress={() => {
+                if (!books.length) {
+                  showToast('No Records Found.');
+                  return;
+                }
+                navigate('BookDetail', { book: books[0] });
+              }}
               style={GlobalStyles.button}
             >
               <View>
