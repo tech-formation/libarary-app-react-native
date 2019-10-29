@@ -19,6 +19,7 @@ import { showToast } from '../utils/helper';
 import BookDetail from './BookDetail';
 import ChangePassword from './ChangePassword';
 import Spinner from 'react-native-loading-spinner-overlay';
+import RNFS from 'react-native-fs';
 
 // // To see all the requests in the chrome Dev tools in the network tab.
 // XMLHttpRequest = GLOBAL.originalXMLHttpRequest
@@ -56,10 +57,17 @@ class Login extends Component {
 
   saveDb = async db => {
     try {
-      await AsyncStorage.setItem('lib_db', JSON.stringify(db));
+      var path = RNFS.DocumentDirectoryPath + '/library_db.json';
+
+      await RNFS.writeFile(path, JSON.stringify(db), 'utf8')
+        .then(success => {
+          showToast('Synced Successffuly');
+        })
+        .catch(err => {
+          console.log(err.message);
+        });
     } catch (e) {
       console.log(e);
-      // showToast(e);
     }
   };
 

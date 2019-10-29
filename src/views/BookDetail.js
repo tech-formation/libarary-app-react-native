@@ -5,31 +5,27 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Alert,
   Image,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
 import HeaderMenu from '../components/HeaderMenu';
-import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import RNFS from 'react-native-fs';
+import { showToast } from '../utils/helper';
 
 export default class BookDetail extends Component {
   constructor(props) {
     super(props);
     this.input = React.createRef();
   }
+
   state = {
     is_loading: false,
     book_no: '',
     token: '',
     books: [],
-    book: {
-      shelf_id: '',
-      isbn_number: '',
-      title: '',
-      author: '',
-    },
+    book: {},
   };
 
   static navigationOptions = ({ navigation }) => {
@@ -52,7 +48,16 @@ export default class BookDetail extends Component {
   getDb = async () => {
     const { navigate } = this.props.navigation;
     try {
-      const db = await AsyncStorage.getItem('lib_db');
+      let db = null;
+      var path = RNFS.DocumentDirectoryPath + '/library_db.json';
+
+      await RNFS.readFile(path)
+        .then(result => {
+          db = result;
+        })
+        .catch(err => {
+          console.log(err.message, err.code);
+        });
 
       if (db != null) {
         const { books } = JSON.parse(db);
@@ -72,7 +77,7 @@ export default class BookDetail extends Component {
     const { book_no, books } = this.state;
 
     if (!book_no) {
-      Alert.alert('Please enter book no to scan.');
+      showToast('Please enter book no to scan.');
       return;
     }
 
@@ -86,6 +91,7 @@ export default class BookDetail extends Component {
     } else {
       this.setState({ is_loading: false });
       this.input.focus();
+      showToast('Record Not Found.');
     }
   };
 
@@ -119,56 +125,63 @@ export default class BookDetail extends Component {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.detailsContainer}>
-            <View style={styles.detailsTopRow}>
-              <View style={styles.detailImageContainer}>
-                <Image
-                  source={require('../assets/images/books.png')}
-                  style={styles.booksImage}
-                />
+          {book.id && (
+            <View style={styles.detailsContainer}>
+              <View style={styles.detailsTopRow}>
+                <View style={styles.detailImageContainer}>
+                  <Image
+                    source={require('../assets/images/books.png')}
+                    style={styles.booksImage}
+                  />
+                </View>
+                <View style={styles.titleContainer}>
+                  <Text style={styles.bookTitle}>{book.title}</Text>
+                  <Text style={styles.bookSubTitle}>By: {book.author}</Text>
+                  <Text style={styles.bookSubTitle}>
+                    Barcode: {book.barcode}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.titleContainer}>
-                <Text style={styles.bookTitle}>{book.title}</Text>
-                <Text style={styles.bookSubTitle}>By: {book.author}</Text>
-                <Text style={styles.bookSubTitle}>Barcode: {book.barcode}</Text>
+              <View style={styles.detailMidRow}>
+                <Text style={styles.bookSubTitle}>
+                  Staff Note: {book.staff_note}
+                </Text>
+                <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
+                  Rack: {book.rack}
+                </Text>
+                <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
+                  Side: {book.side}
+                </Text>
+              </View>
+              <View style={styles.detailMidRow}>
+                <Text style={styles.bookSubTitle}>
+                  Location: {book.location}
+                </Text>
+                <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
+                  BIB: {book.bib_id}
+                </Text>
+              </View>
+              <View style={styles.detailMidRow}>
+                <Text style={styles.bookSubTitle}>
+                  Call No.: {book.call_number}
+                </Text>
+                <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
+                  Coy No.: {book.copy_number}
+                </Text>
+              </View>
+              <View style={styles.detailBottomRow}>
+                <Text style={styles.bookDescription}>
+                  Lorem Ipsum is simply dummy text of the printing and
+                  typesetting industry. Lorem Ipsum has been the industry's
+                  standard dummy text ever since the 1500s, when an unknown
+                  printer took a galley of type and scrambled it to make a type
+                  specimen book. It has survived not only five centuries, but
+                  also the leap into electronic typesetting, remaining
+                  essentially unchanged.
+                </Text>
               </View>
             </View>
-            <View style={styles.detailMidRow}>
-              <Text style={styles.bookSubTitle}>
-                Staff Note: {book.staff_note}
-              </Text>
-              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
-                Rack: {book.rack}
-              </Text>
-              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
-                Side: {book.side}
-              </Text>
-            </View>
-            <View style={styles.detailMidRow}>
-              <Text style={styles.bookSubTitle}>Location: {book.location}</Text>
-              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
-                BIB: {book.bib_id}
-              </Text>
-            </View>
-            <View style={styles.detailMidRow}>
-              <Text style={styles.bookSubTitle}>
-                Call No.: {book.call_number}
-              </Text>
-              <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
-                Coy No.: {book.copy_number}
-              </Text>
-            </View>
-            <View style={styles.detailBottomRow}>
-              <Text style={styles.bookDescription}>
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text ever since the 1500s, when an unknown printer took a galley
-                of type and scrambled it to make a type specimen book. It has
-                survived not only five centuries, but also the leap into
-                electronic typesetting, remaining essentially unchanged.
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
       </>
     );

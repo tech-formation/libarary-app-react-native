@@ -8,11 +8,9 @@ import {
   Picker,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
-import AsyncStorage from '@react-native-community/async-storage';
 import { showToast } from '../utils/helper';
-import { httpGet } from '../utils/http';
-import { SYNC_DATA } from '../configs/constants';
 import Spinner from 'react-native-loading-spinner-overlay';
+import RNFS from 'react-native-fs';
 
 export default class Home extends Component {
   static navigationOptions = { header: null };
@@ -24,7 +22,6 @@ export default class Home extends Component {
     selected_rack: '',
     side_options: [],
     selected_side: '',
-    token: '',
     db: {
       languages: [],
       books: [],
@@ -34,28 +31,25 @@ export default class Home extends Component {
   };
 
   componentDidMount() {
-    this.getDb();
-    this.getToken();
+    setTimeout(() => this.getDb(), 200);
   }
 
-  getToken = async () => {
-    const { navigate } = this.props.navigation;
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (token != null) {
-        this.setState({ token });
-      } else {
-        navigate('Login');
-      }
-    } catch (e) {
-      // showToast(e);
-    }
-  };
-
   getDb = async () => {
+    this.setState({ is_loading: true });
     const { navigate } = this.props.navigation;
     try {
-      const db = await AsyncStorage.getItem('lib_db');
+      let db = null;
+      var path = RNFS.DocumentDirectoryPath + '/library_db.json';
+
+      await RNFS.readFile(path)
+        .then(result => {
+          db = result;
+        })
+        .catch(err => {
+          console.log(err.message, err.code);
+        });
+
+      this.setState({ is_loading: false });
 
       if (db != null) {
         this.setState({ db: JSON.parse(db) });
@@ -65,41 +59,6 @@ export default class Home extends Component {
     } catch (e) {
       // showToast(e);
     }
-  };
-
-  saveDb = async db => {
-    try {
-      await AsyncStorage.setItem('lib_db', JSON.stringify(db));
-      this.setState({
-        db,
-        selected_language: '',
-        selected_side: '',
-        selected_rack: '',
-      });
-    } catch (e) {
-      console.log(e);
-      // showToast(e);
-    }
-  };
-
-  syncData = () => {
-    const { token } = this.state;
-    this.setState({ is_loading: true });
-
-    httpGet(SYNC_DATA, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(res => {
-        this.saveDb(res);
-        showToast('Synced Successfully');
-        this.setState({ is_loading: false });
-      })
-      .catch(err => {
-        this.setState({ is_loading: false });
-        setTimeout(() => showToast(err), 200);
-      });
   };
 
   render() {
@@ -130,15 +89,6 @@ export default class Home extends Component {
                 <Text style={GlobalStyles.largeText}>Books Organizer</Text>
               </View>
 
-              {/* <TouchableOpacity
-                onPress={this.syncData}
-                style={GlobalStyles.sync}
-              >
-                <View>
-                  <Text style={GlobalStyles.buttonText}>SYNC</Text>
-                </View>
-              </TouchableOpacity> */}
-
               <TouchableOpacity
                 onPress={() => {
                   if (!books.length) {
@@ -155,35 +105,30 @@ export default class Home extends Component {
               </TouchableOpacity>
 
               <View style={GlobalStyles.verticalSpace} />
-              {languages.length > 0 && (
-                <View>
-                  <Picker
-                    selectedValue={selected_language}
-                    style={GlobalStyles.select}
-                    onValueChange={(v, i) => {
-                      let filtred_racks = [];
-                      if (v) {
-                        filtred_racks = racks.filter(r => r.language_id == v);
-                      }
-                      this.setState({
-                        selected_language: v,
-                        selected_rack: '',
-                        selected_side: '',
-                        rack_options: filtred_racks,
-                      });
-                    }}
-                  >
-                    <Picker.Item label="Select Language" value="" />
-                    {languages.map(obj => (
-                      <Picker.Item
-                        key={obj.id}
-                        label={obj.name}
-                        value={obj.id}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              )}
+
+              <View>
+                <Picker
+                  selectedValue={selected_language}
+                  style={GlobalStyles.select}
+                  onValueChange={(v, i) => {
+                    let filtred_racks = [];
+                    if (v) {
+                      filtred_racks = racks.filter(r => r.language_id == v);
+                    }
+                    this.setState({
+                      selected_language: v,
+                      selected_rack: '',
+                      selected_side: '',
+                      rack_options: filtred_racks,
+                    });
+                  }}
+                >
+                  <Picker.Item label="Select Language" value="" />
+                  {languages.map(obj => (
+                    <Picker.Item key={obj.id} label={obj.name} value={obj.id} />
+                  ))}
+                </Picker>
+              </View>
 
               <View>
                 <Picker

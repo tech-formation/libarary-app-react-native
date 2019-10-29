@@ -19,6 +19,7 @@ import { showToast } from '../utils/helper';
 import AsyncStorage from '@react-native-community/async-storage';
 import HeaderMenu from '../components/HeaderMenu';
 import Sound from 'react-native-sound';
+import RNFS from 'react-native-fs';
 
 class ScanShelf extends Component {
   constructor(props) {
@@ -66,7 +67,16 @@ class ScanShelf extends Component {
   getDb = async () => {
     const { navigate } = this.props.navigation;
     try {
-      const db = await AsyncStorage.getItem('lib_db');
+      let db = null;
+      var path = RNFS.DocumentDirectoryPath + '/library_db.json';
+
+      await RNFS.readFile(path)
+        .then(result => {
+          db = result;
+        })
+        .catch(err => {
+          console.log(err.message, err.code);
+        });
 
       if (db != null) {
         this.setState({ db: JSON.parse(db) });
