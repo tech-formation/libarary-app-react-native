@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
-import { createStackNavigator, createAppContainer } from 'react-navigation';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
 import Home from './Home';
 import ScanShelf from './ScanShelf';
 import Scan from './Scan';

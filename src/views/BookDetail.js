@@ -17,7 +17,7 @@ import { showToast } from '../utils/helper';
 export default class BookDetail extends Component {
   constructor(props) {
     super(props);
-    this.input = React.createRef();
+    this.input1 = React.createRef();
   }
 
   state = {
@@ -86,11 +86,12 @@ export default class BookDetail extends Component {
 
     if (book) {
       this.setState({ is_loading: false, book });
-      this.input.clear();
-      this.input.focus();
+      this.input1.clear();
+      this.input1.focus();
     } else {
       this.setState({ is_loading: false });
-      this.input.focus();
+      this.input1.clear();
+      this.input1.focus();
       showToast('Record Not Found.');
     }
   };
@@ -105,8 +106,8 @@ export default class BookDetail extends Component {
         <View style={styles.mainContainer}>
           <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
             <TextInput
-              ref={input => {
-                this.input = input;
+              ref={obj => {
+                this.input1 = obj;
               }}
               selectTextOnFocus={true}
               placeholder="Enter Book Number"
@@ -115,7 +116,7 @@ export default class BookDetail extends Component {
               autoCapitalize="none"
               keyboardType="numeric"
               value={book_no}
-              onSubmitEditing={this.scanBook}
+              onSubmitEditing={() => this.scanBook()}
               onChangeText={value => {
                 this.setState({ book_no: value });
               }}

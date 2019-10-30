@@ -11,6 +11,7 @@ import GlobalStyles from '../assets/styles/StyleSheet';
 import { showToast } from '../utils/helper';
 import Spinner from 'react-native-loading-spinner-overlay';
 import RNFS from 'react-native-fs';
+import { NavigationEvents } from 'react-navigation';
 
 export default class Home extends Component {
   static navigationOptions = { header: null };
@@ -75,6 +76,8 @@ export default class Home extends Component {
 
     return (
       <>
+        <NavigationEvents onDidFocus={payload => this.getDb()} />
+
         <Spinner visible={is_loading} color="#8c1d1a" />
         <View style={GlobalStyles.mainContainer}>
           <View style={GlobalStyles.contentContainer}>
@@ -124,9 +127,14 @@ export default class Home extends Component {
                   }}
                 >
                   <Picker.Item label="Select Language" value="" />
-                  {languages.map(obj => (
-                    <Picker.Item key={obj.id} label={obj.name} value={obj.id} />
-                  ))}
+                  {languages &&
+                    languages.map(obj => (
+                      <Picker.Item
+                        key={obj.id}
+                        label={obj.name}
+                        value={obj.id}
+                      />
+                    ))}
                 </Picker>
               </View>
 

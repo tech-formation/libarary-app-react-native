@@ -24,7 +24,8 @@
     "react-native-sound": "^0.11.0",
     "react-native-tab-view": "^2.9.0",
     "react-native-vector-icons": "^6.6.0",
-    "react-navigation": "^3.11.1"
+    "react-navigation": "^4.0.10",
+    "react-navigation-stack": "^1.10.3"
   },
   "devDependencies": {
     "@babel/core": "7.5.5",

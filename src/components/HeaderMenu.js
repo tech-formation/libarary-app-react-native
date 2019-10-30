@@ -120,7 +120,7 @@ class HeaderMenu extends React.Component {
 
           <MenuItem onPress={this.syncData} textStyle={GlobalStyles.menuText}>
             <VectorIcon name="sync" size={12} color="#808080" />
-            <Text> Sync</Text>
+            <Text>Sync DB</Text>
           </MenuItem>
 
           <MenuItem onPress={this.logout} textStyle={GlobalStyles.menuText}>

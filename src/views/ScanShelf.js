@@ -169,8 +169,8 @@ class ScanShelf extends Component {
 
       setTimeout(() => {
         this.updateTabs();
-        this.input.focus();
         this.input.clear();
+        this.input.focus();
         this.playSound('found');
       }, 100);
     } else {
@@ -189,6 +189,7 @@ class ScanShelf extends Component {
           this.input.focus();
         }, 100);
       } else {
+        this.input.clear();
         this.input.focus();
         this.playSound('not_found');
       }
