@@ -86,14 +86,15 @@ export default class BookDetail extends Component {
 
     if (book) {
       this.setState({ is_loading: false, book });
-      this.input1.clear();
-      this.input1.focus();
     } else {
       this.setState({ is_loading: false });
-      this.input1.clear();
-      this.input1.focus();
       showToast('Record Not Found.');
     }
+
+    setTimeout(() => {
+      this.input1.clear();
+      this.input1.focus();
+    }, 200);
   };
 
   render() {
