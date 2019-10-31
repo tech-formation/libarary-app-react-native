@@ -36,6 +36,13 @@ export default class Home extends Component {
   }
 
   getDb = async () => {
+    const {
+      db: { languages },
+    } = this.state;
+
+    if (languages.length != 0) {
+      return;
+    }
     this.setState({ is_loading: true });
     const { navigate } = this.props.navigation;
     try {

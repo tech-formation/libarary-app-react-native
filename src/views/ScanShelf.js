@@ -66,6 +66,9 @@ class ScanShelf extends Component {
 
   getDb = async () => {
     const { navigate } = this.props.navigation;
+
+    this.setState({ is_loading: true });
+
     try {
       let db = null;
       var path = RNFS.DocumentDirectoryPath + '/library_db.json';
@@ -79,7 +82,7 @@ class ScanShelf extends Component {
         });
 
       if (db != null) {
-        this.setState({ db: JSON.parse(db) });
+        this.setState({ db: JSON.parse(db), is_loading: false });
         const { books } = JSON.parse(db);
 
         const { navigation } = this.props;
@@ -99,6 +102,7 @@ class ScanShelf extends Component {
           this.updateTabs();
           this.setState({ is_loading: false });
         }, 100);
+        this.input.focus();
       } else {
         navigate('Login');
       }
@@ -192,6 +196,7 @@ class ScanShelf extends Component {
         this.input.clear();
         this.input.focus();
         this.playSound('not_found');
+        showToast('Record not found');
       }
 
       // let url = FETCH_BOOK_URL;
