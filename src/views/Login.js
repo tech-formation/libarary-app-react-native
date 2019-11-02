@@ -197,7 +197,7 @@ class Login extends Component {
 
 const styles = StyleSheet.create({
   formContainer: {
-    flex: 0.6,
+    flex: 0.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#a9a9a9',
     height: 45,
-    margin: 10,
+    margin: 7,
     width: 300,
   },
 
