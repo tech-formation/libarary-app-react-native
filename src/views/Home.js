@@ -120,10 +120,13 @@ export default class Home extends Component {
 
               <View style={GlobalStyles.verticalSpace} />
 
-              <View>
+              <View style={styles.horizontalLine} />
+
+              <View style={GlobalStyles.verticalSpace} />
+
+              <View style={styles.languageSelect}>
                 <Picker
                   selectedValue={selected_language}
-                  style={GlobalStyles.select}
                   onValueChange={(v, i) => {
                     let filtred_racks = racks;
                     if (v) {
@@ -152,50 +155,60 @@ export default class Home extends Component {
                 </Picker>
               </View>
 
-              <View>
-                <Picker
-                  enabled={show_rack}
-                  selectedValue={selected_rack}
-                  style={GlobalStyles.select}
-                  onValueChange={(v, i) => {
-                    let filtred_sides = sides;
-                    if (v) {
-                      filtred_sides = sides.filter(r => r.rack_id == v);
-                      this.setState({ show_side: true });
-                    } else {
-                      this.setState({ show_side: false });
+              <View style={GlobalStyles.verticalSpace} />
+
+              <View style={styles.row}>
+                <View style={styles.rackAndSideSelect}>
+                  <Picker
+                    enabled={show_rack}
+                    selectedValue={selected_rack}
+                    onValueChange={(v, i) => {
+                      let filtred_sides = sides;
+                      if (v) {
+                        filtred_sides = sides.filter(r => r.rack_id == v);
+                        this.setState({ show_side: true });
+                      } else {
+                        this.setState({ show_side: false });
+                      }
+                      this.setState({
+                        selected_rack: v,
+                        selected_side: '',
+                        side_options: filtred_sides,
+                      });
+                    }}
+                  >
+                    <Picker.Item label="Select Rack" value="" />
+                    {rack_options.length > 0 &&
+                      rack_options.map(obj => (
+                        <Picker.Item
+                          key={obj.id}
+                          label={obj.name}
+                          value={obj.id}
+                        />
+                      ))}
+                  </Picker>
+                </View>
+
+                <View style={styles.horizentalSpace} />
+
+                <View style={styles.rackAndSideSelect}>
+                  <Picker
+                    enabled={show_side}
+                    selectedValue={selected_side}
+                    onValueChange={(v, i) =>
+                      this.setState({ selected_side: v })
                     }
-                    this.setState({
-                      selected_rack: v,
-                      selected_side: '',
-                      side_options: filtred_sides,
-                    });
-                  }}
-                >
-                  <Picker.Item label="Select Rack" value="" />
-                  {rack_options.length > 0 &&
-                    rack_options.map(obj => (
+                  >
+                    <Picker.Item label="Select Side" value="" />
+                    {side_options.map(obj => (
                       <Picker.Item
                         key={obj.id}
                         label={obj.name}
                         value={obj.id}
                       />
                     ))}
-                </Picker>
-              </View>
-
-              <View>
-                <Picker
-                  enabled={show_side}
-                  selectedValue={selected_side}
-                  style={GlobalStyles.select}
-                  onValueChange={(v, i) => this.setState({ selected_side: v })}
-                >
-                  <Picker.Item label="Select Side" value="" />
-                  {side_options.map(obj => (
-                    <Picker.Item key={obj.id} label={obj.name} value={obj.id} />
-                  ))}
-                </Picker>
+                  </Picker>
+                </View>
               </View>
 
               <TouchableOpacity
@@ -240,5 +253,38 @@ const styles = StyleSheet.create({
     flex: 0.6,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  languageSelect: {
+    width: 300,
+    height: 47,
+    top: 5,
+    borderWidth: 0.5,
+    borderColor: '#a9a9a9',
+  },
+  row: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  inputWrap: {
+    flex: 1,
+    borderColor: '#cccccc',
+    borderBottomWidth: 1,
+    marginBottom: 10,
+  },
+  horizentalSpace: {
+    width: 20,
+  },
+  rackAndSideSelect: {
+    width: 140,
+    height: 47,
+    top: 5,
+    borderWidth: 0.5,
+    borderColor: '#a9a9a9',
+  },
+  horizontalLine: {
+    width: 300,
+    borderWidth: 0.2,
+    borderColor: '#a9a9a9',
+    top: 20,
   },
 });
