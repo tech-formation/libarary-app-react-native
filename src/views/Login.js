@@ -8,17 +8,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import GlobalStyles from '../assets/styles/StyleSheet';
-import { createStackNavigator, createAppContainer } from 'react-navigation';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
 import Home from './Home';
 import ScanShelf from './ScanShelf';
 import Scan from './Scan';
-import { LOGIN_API_URL } from '../configs/constants';
-import { httpPost } from '../utils/http';
+import { LOGIN_API_URL, SYNC_DATA } from '../configs/constants';
+import { httpPost, httpGet } from '../utils/http';
 import AsyncStorage from '@react-native-community/async-storage';
 import { showToast } from '../utils/helper';
 import BookDetail from './BookDetail';
 import ChangePassword from './ChangePassword';
 import Spinner from 'react-native-loading-spinner-overlay';
+import RNFS from 'react-native-fs';
 
 // // To see all the requests in the chrome Dev tools in the network tab.
 // XMLHttpRequest = GLOBAL.originalXMLHttpRequest
@@ -49,9 +51,24 @@ class Login extends Component {
   saveLoggedInUserInfo = async (token, user) => {
     try {
       await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('user', user);
     } catch (e) {
       // showToast(e);
+    }
+  };
+
+  saveDb = async db => {
+    try {
+      var path = RNFS.DocumentDirectoryPath + '/library_db.json';
+
+      await RNFS.writeFile(path, JSON.stringify(db), 'utf8')
+        .then(success => {
+          showToast('Synced Successffuly');
+        })
+        .catch(err => {
+          console.log(err.message);
+        });
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -73,14 +90,32 @@ class Login extends Component {
 
     httpPost(LOGIN_API_URL, params)
       .then(res => {
-        const { navigate } = this.props.navigation;
         this.saveLoggedInUserInfo(res.token, res.user);
+        this.setState({ is_loading: false });
+        this.syncData(res.token);
+      })
+      .catch(err => {
+        this.setState({ is_loading: false });
+        setTimeout(() => showToast(err.error), 100);
+      });
+  };
+
+  syncData = token => {
+    this.setState({ is_loading: true });
+    const { navigate } = this.props.navigation;
+    httpGet(SYNC_DATA, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => {
+        this.saveDb(res);
         this.setState({ is_loading: false });
         navigate('Home');
       })
       .catch(err => {
         this.setState({ is_loading: false });
-        setTimeout(() => showToast(err.error), 100);
+        setTimeout(() => showToast(err), 200);
       });
   };
 
@@ -101,16 +136,21 @@ class Login extends Component {
             </View>
             <View style={styles.formContainer}>
               <View style={styles.inputContainer}>
-                <Image
+                {/* <Image
                   source={require('../assets/images/ico-email.png')} //Change your icon image here
                   style={styles.inputIcon}
-                />
+                /> */}
 
                 <TextInput
                   style={styles.textInput}
                   placeholder="Username"
                   value={username}
                   autoCapitalize="none"
+                  blurOnSubmit={false}
+                  returnKeyType={'next'}
+                  onSubmitEditing={() => {
+                    this.password.focus();
+                  }}
                   onChangeText={value => {
                     this.setState({ username: value });
                   }}
@@ -118,10 +158,10 @@ class Login extends Component {
                 />
               </View>
               <View style={styles.inputContainer}>
-                <Image
+                {/* <Image
                   source={require('../assets/images/ico-password.png')} //Change your icon image here
                   style={styles.inputIcon}
-                />
+                /> */}
 
                 <TextInput
                   style={styles.textInput}
@@ -129,8 +169,12 @@ class Login extends Component {
                   value={password}
                   secureTextEntry={true}
                   autoCompleteType="password"
+                  returnKeyType={'done'}
                   onChangeText={value => {
                     this.setState({ password: value });
+                  }}
+                  ref={input => {
+                    this.password = input;
                   }}
                   underlineColorAndroid="transparent"
                 />
@@ -160,6 +204,8 @@ const styles = StyleSheet.create({
 
   textInput: {
     flex: 1,
+    width: 300,
+    paddingLeft: 10,
   },
 
   inputContainer: {
@@ -167,10 +213,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#a9a9a9',
-    height: 40,
+    borderWidth: 0.5,
+    borderColor: '#a9a9a9',
+    height: 45,
     margin: 10,
+    width: 300,
   },
 
   inputIcon: {
@@ -193,7 +240,7 @@ const MainNavigator = createStackNavigator(
     ChangePassword: { screen: ChangePassword },
   },
   {
-    initialRouteName: 'Login',
+    initialRouteName: 'Home',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',
