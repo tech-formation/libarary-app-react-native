@@ -118,15 +118,16 @@ export default class Home extends Component {
                 </View>
               </TouchableOpacity>
 
-              <View style={GlobalStyles.verticalSpace} />
+              <View style={styles.verticalSpace} />
 
               <View style={styles.horizontalLine} />
 
-              <View style={GlobalStyles.verticalSpace} />
+              <View style={styles.verticalSpace} />
 
               <View style={styles.languageSelect}>
                 <Picker
                   selectedValue={selected_language}
+                  style={styles.pickerTextHeight}
                   onValueChange={(v, i) => {
                     let filtred_racks = racks;
                     if (v) {
@@ -155,13 +156,14 @@ export default class Home extends Component {
                 </Picker>
               </View>
 
-              <View style={GlobalStyles.verticalSpace} />
+              <View style={styles.smallVerticalSpace} />
 
               <View style={styles.row}>
                 <View style={styles.rackAndSideSelect}>
                   <Picker
                     enabled={show_rack}
                     selectedValue={selected_rack}
+                    style={styles.pickerTextHeight}
                     onValueChange={(v, i) => {
                       let filtred_sides = sides;
                       if (v) {
@@ -195,6 +197,7 @@ export default class Home extends Component {
                   <Picker
                     enabled={show_side}
                     selectedValue={selected_side}
+                    style={styles.pickerTextHeight}
                     onValueChange={(v, i) =>
                       this.setState({ selected_side: v })
                     }
@@ -234,10 +237,10 @@ export default class Home extends Component {
                     side: selected_side,
                   });
                 }}
-                style={GlobalStyles.button}
+                style={styles.submitButton}
               >
                 <View>
-                  <Text style={GlobalStyles.buttonText}>SCAN RACK SIDE</Text>
+                  <Text style={GlobalStyles.buttonText}>SUBMIT</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -256,8 +259,8 @@ const styles = StyleSheet.create({
   },
   languageSelect: {
     width: 300,
-    height: 47,
-    top: 5,
+    height: 40,
+    top: 9,
     borderWidth: 0.5,
     borderColor: '#a9a9a9',
   },
@@ -272,11 +275,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   horizentalSpace: {
-    width: 20,
+    width: 15,
   },
   rackAndSideSelect: {
     width: 140,
-    height: 47,
+    height: 40,
     top: 5,
     borderWidth: 0.5,
     borderColor: '#a9a9a9',
@@ -287,4 +290,22 @@ const styles = StyleSheet.create({
     borderColor: '#a9a9a9',
     top: 20,
   },
+  pickerTextHeight: {
+    height: 40,
+  },
+  verticalSpace: {
+    height: 40,
+  },
+  smallVerticalSpace: {
+    height: 15,
+  },
+  submitButton: {
+    backgroundColor: '#8c1d1a',
+    width: 300,
+    height: 40,
+    top: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+  }
 });
