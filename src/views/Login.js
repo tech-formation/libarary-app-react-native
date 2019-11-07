@@ -136,10 +136,10 @@ class Login extends Component {
             </View>
             <View style={styles.formContainer}>
               <View style={styles.inputContainer}>
-                {/* <Image
+                <Image
                   source={require('../assets/images/ico-email.png')} //Change your icon image here
                   style={styles.inputIcon}
-                /> */}
+                />
 
                 <TextInput
                   style={styles.textInput}
@@ -158,10 +158,10 @@ class Login extends Component {
                 />
               </View>
               <View style={styles.inputContainer}>
-                {/* <Image
+                <Image
                   source={require('../assets/images/ico-password.png')} //Change your icon image here
                   style={styles.inputIcon}
-                /> */}
+                />
 
                 <TextInput
                   style={styles.textInput}
@@ -197,15 +197,13 @@ class Login extends Component {
 
 const styles = StyleSheet.create({
   formContainer: {
-    flex: 0.5,
+    flex: 0.6,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   textInput: {
     flex: 1,
-    width: 300,
-    paddingLeft: 10,
   },
 
   inputContainer: {
@@ -213,11 +211,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderWidth: 0.5,
-    borderColor: '#a9a9a9',
-    height: 45,
-    margin: 7,
-    width: 300,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#a9a9a9',
+    height: 40,
+    margin: 10,
   },
 
   inputIcon: {

@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
     top: 9,
     borderWidth: 0.5,
     borderColor: '#a9a9a9',
+    borderRadius: 5,
   },
   row: {
     flex: 1,
@@ -278,11 +279,12 @@ const styles = StyleSheet.create({
     width: 15,
   },
   rackAndSideSelect: {
-    width: 140,
+    width: 142,
     height: 40,
     top: 5,
     borderWidth: 0.5,
     borderColor: '#a9a9a9',
+    borderRadius: 5,
   },
   horizontalLine: {
     width: 300,
@@ -307,5 +309,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
-  }
+  },
 });
