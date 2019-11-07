@@ -15,26 +15,20 @@ const ListItem = ({ data }) => {
             <Text style={styles.listItemTitle}>{truncate(item.title)}</Text>
             <View style={[styles.listItemDetails, styles.inlineFlow]}>
               <View style={styles.inlineFlow}>
-                <Text style={styles.listItemLabel}>By: </Text>
+                <Text style={styles.listItemLabel}>By:&nbsp;</Text>
                 <Text style={styles.listItemText}>{item.author}</Text>
               </View>
               <View style={styles.inlineFlow}>
                 <Text style={[styles.listItemLabel, styles.leftPadding20]}>
-                  Staff Note:{' '}
+                  Staff Note:&nbsp;
                 </Text>
                 <Text style={styles.listItemText}>{item.staff_note}</Text>
               </View>
             </View>
             <View style={[styles.listItemDetails, styles.inlineFlow]}>
               <View style={styles.inlineFlow}>
-                <Text style={[styles.listItemLabel]}>Location: </Text>
-                <Text style={styles.listItemText}>{item.location}</Text>
-              </View>
-              <View style={styles.inlineFlow}>
-                <Text style={[styles.listItemLabel, styles.leftPadding20]}>
-                  BIB:{' '}
-                </Text>
-                <Text style={styles.listItemText}>{item.bib_id}</Text>
+                <Text style={[styles.listItemLabel]}>Call No:&nbsp;</Text>
+                <Text style={styles.listItemText}>{item.call_number}</Text>
               </View>
             </View>
           </View>
@@ -50,19 +44,19 @@ const styles = StyleSheet.create({
   },
   listItem: {
     backgroundColor: '#fff',
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingLeft: 20,
     borderBottomWidth: 0.5,
     borderBottomColor: '#a9a9a9',
-    height: 90,
+    height: 85,
   },
   listItemTitle: {
-    flex: 0.6,
+    flex: 0.5,
     color: '#000',
     fontSize: 16,
   },
   listItemDetails: {
-    flex: 0.4,
+    flex: 0.5,
   },
   inlineFlow: {
     flexDirection: 'row',

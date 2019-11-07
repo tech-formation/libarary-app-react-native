@@ -111,7 +111,7 @@ class Login extends Component {
       .then(res => {
         this.saveDb(res);
         this.setState({ is_loading: false });
-        navigate('Home');
+        navigate('ScanShelf');
       })
       .catch(err => {
         this.setState({ is_loading: false });
@@ -237,7 +237,7 @@ const MainNavigator = createStackNavigator(
     ChangePassword: { screen: ChangePassword },
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'ScanShelf',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',
