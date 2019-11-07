@@ -1,6 +1,10 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+  flexCenter: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   mainContainer: {
     flex: 1,
     flexDirection: 'row',
@@ -44,12 +48,31 @@ export default StyleSheet.create({
   },
   button: {
     backgroundColor: '#8c1d1a',
-    width: 300,
+    width: '80%',
     height: 40,
     top: 30,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+  },
+  simpleButton: {
+    backgroundColor: '#8c1d1a',
+    width: '80%',
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  confirmaitonModal: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    height: 150,
+    width: '80%',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+    paddingVertical: 20,
   },
   select: {
     width: 200,

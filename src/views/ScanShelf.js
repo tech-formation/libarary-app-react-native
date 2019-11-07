@@ -17,6 +17,7 @@ import HeaderMenu from '../components/HeaderMenu';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
 import { NavigationEvents } from 'react-navigation';
+import Modal from 'react-native-modal';
 
 const CONTINUE_GAP = 3;
 const LOAD_CHUNK = 10;
@@ -36,6 +37,7 @@ class ScanShelf extends Component {
    */
   state = {
     is_loading: false,
+    is_modal_visible: false,
     book_no: '31111000154367',
     missing: [],
     actual: [],
@@ -275,7 +277,13 @@ class ScanShelf extends Component {
   };
 
   render() {
-    const { book_no, missing, actual, is_loading } = this.state;
+    const {
+      book_no,
+      missing,
+      actual,
+      is_loading,
+      is_modal_visible,
+    } = this.state;
     const ActualView = () => <ListItem data={actual} />;
     const MissingView = () => <ListItem data={missing} />;
 
@@ -336,6 +344,30 @@ class ScanShelf extends Component {
           onIndexChange={index => this.setState({ index })}
           initialLayout={{ width: Dimensions.get('window').width }}
         />
+
+        <Modal style={GlobalStyles.flexCenter} isVisible={is_modal_visible}>
+          <View style={GlobalStyles.confirmaitonModal}>
+            <TouchableOpacity
+              onPress={() => {}}
+              style={GlobalStyles.simpleButton}
+            >
+              <View>
+                <Text style={GlobalStyles.buttonText}>OUT</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                this.setState({ is_modal_visible: false });
+              }}
+              style={GlobalStyles.simpleButton}
+            >
+              <View>
+                <Text style={GlobalStyles.buttonText}>CONTINUE</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </>
     );
   }
