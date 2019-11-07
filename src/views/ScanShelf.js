@@ -16,8 +16,9 @@ import { showToast } from '../utils/helper';
 import HeaderMenu from '../components/HeaderMenu';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
+import { NavigationEvents } from 'react-navigation';
 
-// const CONTINUE_GAP = 3;
+const CONTINUE_GAP = 3;
 const LOAD_CHUNK = 10;
 
 class ScanShelf extends Component {
@@ -63,18 +64,28 @@ class ScanShelf extends Component {
   };
 
   /**
-   * Components Mount
+   * Reset state
    */
-  componentDidMount() {
-    this.readJsonDbFile();
-  }
+  resetState = () => {
+    this.setState({
+      missing: [],
+      actual: [],
+      index: 0,
+      scan_index: 0,
+      routes: [
+        { key: 'actual', title: 'Actual (0/0)' },
+        { key: 'missing', title: 'Missing (0)' },
+      ],
+    });
+  };
 
   /**
    * Reads database from local JSON file.
    */
   readJsonDbFile = async () => {
-    const { navigate } = this.props.navigation;
+    this.resetState();
 
+    const { navigate } = this.props.navigation;
     this.setState({ is_loading: true });
 
     try {
@@ -189,7 +200,12 @@ class ScanShelf extends Component {
         actual_copy.push(scanned_book);
       }
 
-      this.setState({ missing: book_load, actual: actual_copy, index: 0 });
+      this.setState({
+        missing: book_load,
+        actual: actual_copy,
+        index: 0,
+        scan_index: scanned_index,
+      });
 
       setTimeout(this.recordFound, 100);
     } else {
@@ -201,7 +217,7 @@ class ScanShelf extends Component {
    * Scanning continues
    */
   scanBook = () => {
-    const { missing, actual, book_no } = this.state;
+    const { missing, actual, book_no, books, scan_index } = this.state;
 
     if (!book_no) {
       showToast('Please enter Book Number to scan');
@@ -211,23 +227,45 @@ class ScanShelf extends Component {
     if (missing.length == 0) {
       this.initialBookScan();
     } else {
-      const scanned = [...missing, ...actual].find(book => {
+      const already_scanned = actual.find(book => {
+        return book.barcode == book_no;
+      });
+
+      if (already_scanned) {
+        showToast('Book already scanned.');
+        return;
+      }
+
+      const scanned = missing.find(book => {
         return book.barcode == book_no;
       });
 
       if (scanned) {
         const missing_copy = [...missing];
+        const scanned_index = books.indexOf(scanned);
+        const index_diff = scanned_index - scan_index;
+
+        if (index_diff > 1 && index_diff <= CONTINUE_GAP) {
+          showToast('You can continue');
+        }
+
+        if (index_diff > CONTINUE_GAP) {
+          showToast('You have to OUT this book');
+        }
 
         if (this.isExistInArray(missing_copy, scanned)) {
           missing_copy.splice(missing.indexOf(scanned), 1);
         }
 
         const actual_copy = [...actual];
-        if (!this.isExistInArray(actual_copy, scanned)) {
-          actual_copy.push(scanned);
-        }
+        actual_copy.push(scanned);
 
-        this.setState({ missing: missing_copy, actual: actual_copy, index: 0 });
+        this.setState({
+          missing: missing_copy,
+          actual: actual_copy,
+          scan_index: scanned_index,
+          index: 0,
+        });
 
         setTimeout(this.recordFound, 100);
       } else {
@@ -243,6 +281,8 @@ class ScanShelf extends Component {
 
     return (
       <>
+        <NavigationEvents onDidFocus={payload => this.readJsonDbFile()} />
+
         <Spinner visible={is_loading} color="#8c1d1a" />
 
         <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
