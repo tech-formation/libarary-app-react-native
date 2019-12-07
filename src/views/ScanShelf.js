@@ -19,8 +19,8 @@ import RNFS from 'react-native-fs';
 import { NavigationEvents } from 'react-navigation';
 import Modal from 'react-native-modal';
 
-const CONTINUE_GAP = 3;
-const LOAD_CHUNK = 10;
+const CONTINUE_GAP = 20;
+const LOAD_CHUNK = 2000;
 
 class ScanShelf extends Component {
   /**
@@ -38,7 +38,9 @@ class ScanShelf extends Component {
   state = {
     is_loading: false,
     is_modal_visible: false,
-    book_no: '31111000154367',
+    can_continue: true,
+    book_no: '',
+    current_scanned_index: 0,
     missing: [],
     actual: [],
     index: 0,
@@ -74,6 +76,7 @@ class ScanShelf extends Component {
       actual: [],
       index: 0,
       scan_index: 0,
+      current_scanned_index: 0,
       routes: [
         { key: 'actual', title: 'Actual (0/0)' },
         { key: 'missing', title: 'Missing (0)' },
@@ -235,6 +238,7 @@ class ScanShelf extends Component {
 
       if (already_scanned) {
         showToast('Book already scanned.');
+        this.inputClearAndFocus();
         return;
       }
 
@@ -247,29 +251,42 @@ class ScanShelf extends Component {
         const scanned_index = books.indexOf(scanned);
         const index_diff = scanned_index - scan_index;
 
-        if (index_diff > 1 && index_diff <= CONTINUE_GAP) {
-          showToast('You can continue');
-        }
-
-        if (index_diff > CONTINUE_GAP) {
-          showToast('You have to OUT this book');
-        }
-
-        if (this.isExistInArray(missing_copy, scanned)) {
-          missing_copy.splice(missing.indexOf(scanned), 1);
-        }
-
-        const actual_copy = [...actual];
-        actual_copy.push(scanned);
-
         this.setState({
-          missing: missing_copy,
-          actual: actual_copy,
-          scan_index: scanned_index,
-          index: 0,
+          current_scanned_index: scanned_index,
         });
 
-        setTimeout(this.recordFound, 100);
+        if (index_diff <= 0) {
+          this.setState({
+            is_modal_visible: true,
+            can_continue: false,
+          });
+        } else if (index_diff > 1 && index_diff <= CONTINUE_GAP) {
+          this.setState({
+            is_modal_visible: true,
+            can_continue: true,
+          });
+        } else if (index_diff > CONTINUE_GAP) {
+          this.setState({
+            is_modal_visible: true,
+            can_continue: false,
+          });
+        } else {
+          if (this.isExistInArray(missing_copy, scanned)) {
+            missing_copy.splice(missing.indexOf(scanned), 1);
+          }
+
+          const actual_copy = [...actual];
+          actual_copy.push(scanned);
+
+          this.setState({
+            missing: missing_copy,
+            actual: actual_copy,
+            scan_index: scanned_index,
+            index: 0,
+          });
+
+          setTimeout(this.recordFound, 100);
+        }
       } else {
         this.recordNotFound();
       }
@@ -283,7 +300,9 @@ class ScanShelf extends Component {
       actual,
       is_loading,
       is_modal_visible,
+      can_continue,
     } = this.state;
+
     const ActualView = () => <ListItem data={actual} />;
     const MissingView = () => <ListItem data={missing} />;
 
@@ -348,7 +367,11 @@ class ScanShelf extends Component {
         <Modal style={GlobalStyles.flexCenter} isVisible={is_modal_visible}>
           <View style={GlobalStyles.confirmaitonModal}>
             <TouchableOpacity
-              onPress={() => {}}
+              onPress={() => {
+                this.setState({ is_modal_visible: false });
+                this.inputClearAndFocus();
+                showToast('Out Successfully');
+              }}
               style={GlobalStyles.simpleButton}
             >
               <View>
@@ -356,16 +379,37 @@ class ScanShelf extends Component {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                this.setState({ is_modal_visible: false });
-              }}
-              style={GlobalStyles.simpleButton}
-            >
-              <View>
-                <Text style={GlobalStyles.buttonText}>CONTINUE</Text>
-              </View>
-            </TouchableOpacity>
+            {can_continue && (
+              <TouchableOpacity
+                onPress={() => {
+                  const { current_scanned_index, books } = this.state;
+                  const missing_copy = [...missing];
+                  const scanned = books[current_scanned_index];
+
+                  if (this.isExistInArray(missing_copy, scanned)) {
+                    missing_copy.splice(missing.indexOf(scanned), 1);
+                  }
+
+                  const actual_copy = [...actual];
+                  actual_copy.push(scanned);
+
+                  this.setState({
+                    scan_index: current_scanned_index,
+                    missing: missing_copy,
+                    actual: actual_copy,
+                    index: 0,
+                    is_modal_visible: false,
+                  });
+
+                  setTimeout(this.recordFound, 100);
+                }}
+                style={GlobalStyles.simpleButton}
+              >
+                <View>
+                  <Text style={GlobalStyles.buttonText}>CONTINUE</Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </Modal>
       </>

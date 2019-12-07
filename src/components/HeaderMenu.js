@@ -41,7 +41,7 @@ class HeaderMenu extends React.Component {
     const { navigate } = this.props;
     navigate('Login');
     AsyncStorage.removeItem('token'); //remove token
-    var path = RNFS.DocumentDirectoryPath + '/library_db.json'; //delete DB 
+    var path = RNFS.DocumentDirectoryPath + '/library_db.json'; //delete DB
     RNFS.unlink(path);
 
     this.menu.hide();

@@ -13,11 +13,10 @@ export default StyleSheet.create({
     backgroundColor: '#fff',
   },
   contentContainer: {
-    width: 300,
-    height: 500,
+    width: '75%',
+    justifyContent: 'center',
   },
   logoContainer: {
-    flex: 0.2,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -62,9 +61,11 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+    marginVertical: 10,
   },
   confirmaitonModal: {
-    justifyContent: 'space-between',
+    display: 'flex',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
     height: 150,
