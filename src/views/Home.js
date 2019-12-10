@@ -10,10 +10,11 @@ export default class Home extends Component {
 
   state = {
     is_loading: false,
+    loading_text: '',
   };
 
   getDb = async () => {
-    this.setState({ is_loading: true });
+    this.setState({ is_loading: true, loading_text: 'Loading in memory...' });
     const { navigate } = this.props.navigation;
 
     if (!global.db) {
@@ -25,10 +26,11 @@ export default class Home extends Component {
         })
         .catch(err => {
           console.log(err.message, err.code);
+          navigate('Login');
         });
     }
 
-    this.setState({ is_loading: false });
+    this.setState({ is_loading: false, loading_text: '' });
 
     if (!global.db) {
       navigate('Login');
@@ -37,13 +39,19 @@ export default class Home extends Component {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { is_loading } = this.state;
+    const { is_loading, loading_text } = this.state;
 
     return (
       <>
         <NavigationEvents onDidFocus={() => this.getDb()} />
 
-        <Spinner visible={is_loading} color="#8c1d1a" />
+        <Spinner
+          overlayColor="rgba(0, 0, 0, 0.60)"
+          textStyle={{ color: '#fff' }}
+          textContent={loading_text}
+          visible={is_loading}
+          color="#8c1d1a"
+        />
         <View style={GlobalStyles.mainContainer}>
           <View style={GlobalStyles.contentContainer}>
             <View style={GlobalStyles.logoContainer}>
