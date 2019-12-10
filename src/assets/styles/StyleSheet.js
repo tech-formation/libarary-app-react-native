@@ -19,6 +19,7 @@ export default StyleSheet.create({
   logoContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 20,
   },
   logoImage: {
     width: 100,
@@ -47,16 +48,17 @@ export default StyleSheet.create({
   },
   button: {
     backgroundColor: '#8c1d1a',
-    width: '80%',
+    width: '85%',
     height: 40,
     top: 30,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+    marginVertical: 10,
   },
   simpleButton: {
     backgroundColor: '#8c1d1a',
-    width: '80%',
+    width: '85%',
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -68,12 +70,16 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    height: 150,
+    height: 250,
     width: '80%',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#eee',
-    paddingVertical: 20,
+    paddingVertical: 15,
+  },
+  modalTitle: {
+    width: '80%',
+    marginVertical: 10,
   },
   select: {
     width: 200,

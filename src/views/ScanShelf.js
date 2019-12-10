@@ -41,6 +41,7 @@ class ScanShelf extends Component {
     can_continue: true,
     book_no: '',
     current_scanned_index: 0,
+    expected: [],
     missing: [],
     actual: [],
     index: 0,
@@ -49,6 +50,7 @@ class ScanShelf extends Component {
     routes: [
       { key: 'actual', title: 'Actual (0/0)' },
       { key: 'missing', title: 'Missing (0)' },
+      { key: 'expected', title: 'Expected (0)' },
     ],
   };
 
@@ -58,7 +60,7 @@ class ScanShelf extends Component {
   static navigationOptions = ({ navigation }) => {
     const { navigate } = navigation;
     return {
-      title: 'History',
+      title: 'Scan Rack',
       headerRight: (
         <View style={GlobalStyles.headerRightContainer}>
           <HeaderMenu navigate={navigate} />
@@ -72,14 +74,16 @@ class ScanShelf extends Component {
    */
   resetState = () => {
     this.setState({
-      missing: [],
+      expected: [],
       actual: [],
+      missing: [],
       index: 0,
       scan_index: 0,
       current_scanned_index: 0,
       routes: [
         { key: 'actual', title: 'Actual (0/0)' },
         { key: 'missing', title: 'Missing (0)' },
+        { key: 'expected', title: 'Expected (0)' },
       ],
     });
   };
@@ -88,27 +92,32 @@ class ScanShelf extends Component {
    * Reads database from local JSON file.
    */
   readJsonDbFile = async () => {
+    this.setState({ books: global.db });
     this.resetState();
+    this.inputClearAndFocus();
+  };
 
-    const { navigate } = this.props.navigation;
+  getDb = async () => {
     this.setState({ is_loading: true });
+    const { navigate } = this.props.navigation;
 
-    try {
+    if (!global.db) {
       var path = RNFS.DocumentDirectoryPath + '/library_db.json';
-
+      global.db = [];
       await RNFS.readFile(path)
-        .then(db => {
-          this.setState({ books: JSON.parse(db), is_loading: false });
-          this.input.focus();
+        .then(data => {
+          global.db = JSON.parse(data);
         })
         .catch(err => {
-          navigate('Login');
-          this.handleError(err);
-          this.setState({ is_loading: false });
+          console.log(err.message, err.code);
         });
-    } catch (err) {
-      this.setState({ is_loading: false });
-      this.handleError(err);
+    }
+
+    this.readJsonDbFile();
+    this.setState({ is_loading: false });
+
+    if (!global.db) {
+      navigate('Login');
     }
   };
 
@@ -168,17 +177,22 @@ class ScanShelf extends Component {
    * Updates Tabs text and counter as per data
    */
   updateTabs = () => {
-    const { actual, missing, routes } = this.state;
+    const { actual, expected, routes, missing } = this.state;
     const routes_copy = [...routes];
 
     const new_routes = routes_copy.map(tab => {
       if (tab.key == 'actual') {
-        tab.title = `Actual (${actual.length}/${missing.length})`;
+        tab.title = `Actual (${actual.length}/${expected.length})`;
       }
 
       if (tab.key == 'missing') {
         tab.title = `Missing (${missing.length})`;
       }
+
+      if (tab.key == 'expected') {
+        tab.title = `Expected (${expected.length})`;
+      }
+
       return tab;
     });
 
@@ -202,11 +216,11 @@ class ScanShelf extends Component {
 
       const actual_copy = [...actual];
       if (!this.isExistInArray(actual_copy, scanned_book)) {
-        actual_copy.push(scanned_book);
+        actual_copy.unshift(scanned_book);
       }
 
       this.setState({
-        missing: book_load,
+        expected: book_load,
         actual: actual_copy,
         index: 0,
         scan_index: scanned_index,
@@ -222,14 +236,14 @@ class ScanShelf extends Component {
    * Scanning continues
    */
   scanBook = () => {
-    const { missing, actual, book_no, books, scan_index } = this.state;
+    const { expected, actual, book_no, books, scan_index } = this.state;
 
     if (!book_no) {
       showToast('Please enter Book Number to scan');
       return;
     }
 
-    if (missing.length == 0) {
+    if (expected.length == 0) {
       this.initialBookScan();
     } else {
       const already_scanned = actual.find(book => {
@@ -242,12 +256,12 @@ class ScanShelf extends Component {
         return;
       }
 
-      const scanned = missing.find(book => {
+      const scanned = expected.find(book => {
         return book.barcode == book_no;
       });
 
       if (scanned) {
-        const missing_copy = [...missing];
+        const expected_copy = [...expected];
         const scanned_index = books.indexOf(scanned);
         const index_diff = scanned_index - scan_index;
 
@@ -271,15 +285,15 @@ class ScanShelf extends Component {
             can_continue: false,
           });
         } else {
-          if (this.isExistInArray(missing_copy, scanned)) {
-            missing_copy.splice(missing.indexOf(scanned), 1);
+          if (this.isExistInArray(expected_copy, scanned)) {
+            expected_copy.splice(expected.indexOf(scanned), 1);
           }
 
           const actual_copy = [...actual];
-          actual_copy.push(scanned);
+          actual_copy.unshift(scanned);
 
           this.setState({
-            missing: missing_copy,
+            expected: expected_copy,
             actual: actual_copy,
             scan_index: scanned_index,
             index: 0,
@@ -293,22 +307,94 @@ class ScanShelf extends Component {
     }
   };
 
+  /**
+   * When user click on Out from Modal
+   */
+  onOut = () => {
+    this.setState({ is_modal_visible: false });
+    this.inputClearAndFocus();
+    showToast('Out Successfully');
+  };
+
+  /**
+   * When user click on continue from Modal
+   */
+  onContinue = () => {
+    const {
+      current_scanned_index,
+      books,
+      expected,
+      actual,
+      scan_index,
+      missing,
+    } = this.state;
+
+    this.setState({
+      is_modal_visible: false,
+    });
+
+    const expected_copy = [...expected];
+    let missing_copy = [...missing];
+    const scanned = books[current_scanned_index];
+    const diff = current_scanned_index - scan_index;
+
+    if (this.isExistInArray(expected_copy, scanned)) {
+      expected_copy.splice(expected.indexOf(scanned), 1);
+    }
+
+    const missed = expected_copy.splice(0, diff - 1);
+
+    missing_copy = [...missing_copy, ...missed];
+
+    const actual_copy = [...actual];
+    actual_copy.unshift(scanned);
+
+    this.setState({
+      scan_index: current_scanned_index,
+      expected: expected_copy,
+      actual: actual_copy,
+      missing: missing_copy,
+      index: 0,
+    });
+
+    setTimeout(this.recordFound, 100);
+  };
+
   render() {
     const {
       book_no,
+      expected,
       missing,
       actual,
       is_loading,
       is_modal_visible,
+      current_scanned_index,
+      scan_index,
       can_continue,
     } = this.state;
 
-    const ActualView = () => <ListItem data={actual} />;
-    const MissingView = () => <ListItem data={missing} />;
+    const ActualView = () => (
+      <ListItem data={actual} navigation={this.props.navigation} />
+    );
+    const ExpectedView = () => (
+      <ListItem data={expected} navigation={this.props.navigation} />
+    );
+    const MissingView = () => (
+      <ListItem data={missing} navigation={this.props.navigation} />
+    );
+    const diff = current_scanned_index - (scan_index + 2);
+    let book_title = '';
+    let book_call_number = '';
+
+    if (expected.length) {
+      const { title, call_number } = expected[0];
+      book_title = title;
+      book_call_number = call_number;
+    }
 
     return (
       <>
-        <NavigationEvents onDidFocus={payload => this.readJsonDbFile()} />
+        <NavigationEvents onWillFocus={this.getDb} />
 
         <Spinner visible={is_loading} color="#8c1d1a" />
 
@@ -358,6 +444,7 @@ class ScanShelf extends Component {
           )}
           renderScene={SceneMap({
             actual: ActualView,
+            expected: ExpectedView,
             missing: MissingView,
           })}
           onIndexChange={index => this.setState({ index })}
@@ -366,12 +453,16 @@ class ScanShelf extends Component {
 
         <Modal style={GlobalStyles.flexCenter} isVisible={is_modal_visible}>
           <View style={GlobalStyles.confirmaitonModal}>
+            {can_continue && (
+              <Text style={GlobalStyles.modalTitle}>
+                {`Expected: ${book_title} (${book_call_number}) ${
+                  diff ? `and ${diff} more` : ''
+                }.`}
+              </Text>
+            )}
+
             <TouchableOpacity
-              onPress={() => {
-                this.setState({ is_modal_visible: false });
-                this.inputClearAndFocus();
-                showToast('Out Successfully');
-              }}
+              onPress={this.onOut}
               style={GlobalStyles.simpleButton}
             >
               <View>
@@ -381,28 +472,7 @@ class ScanShelf extends Component {
 
             {can_continue && (
               <TouchableOpacity
-                onPress={() => {
-                  const { current_scanned_index, books } = this.state;
-                  const missing_copy = [...missing];
-                  const scanned = books[current_scanned_index];
-
-                  if (this.isExistInArray(missing_copy, scanned)) {
-                    missing_copy.splice(missing.indexOf(scanned), 1);
-                  }
-
-                  const actual_copy = [...actual];
-                  actual_copy.push(scanned);
-
-                  this.setState({
-                    scan_index: current_scanned_index,
-                    missing: missing_copy,
-                    actual: actual_copy,
-                    index: 0,
-                    is_modal_visible: false,
-                  });
-
-                  setTimeout(this.recordFound, 100);
-                }}
+                onPress={this.onContinue}
                 style={GlobalStyles.simpleButton}
               >
                 <View>

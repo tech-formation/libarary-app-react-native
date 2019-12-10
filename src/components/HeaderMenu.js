@@ -89,9 +89,9 @@ class HeaderMenu extends React.Component {
   saveDb = async db => {
     try {
       var path = RNFS.DocumentDirectoryPath + '/library_db.json';
-
+      global.db = JSON.stringify(db);
       // write the file
-      await RNFS.writeFile(path, JSON.stringify(db), 'utf8')
+      await RNFS.writeFile(path, global.db, 'utf8')
         .then(success => {
           showToast('Synced Successffuly');
         })

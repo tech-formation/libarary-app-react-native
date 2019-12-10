@@ -37,6 +37,11 @@ import RNFS from 'react-native-fs';
 // };
 
 class Login extends Component {
+  constructor() {
+    super();
+    global.db = [];
+  }
+
   static navigationOptions = { header: null };
 
   /**
@@ -59,8 +64,8 @@ class Login extends Component {
   saveDb = async db => {
     try {
       var path = RNFS.DocumentDirectoryPath + '/library_db.json';
-
-      await RNFS.writeFile(path, JSON.stringify(db), 'utf8')
+      global.db = JSON.stringify(db);
+      await RNFS.writeFile(path, global.db, 'utf8')
         .then(success => {
           showToast('Synced Successffuly');
         })
@@ -111,7 +116,7 @@ class Login extends Component {
       .then(res => {
         this.saveDb(res);
         this.setState({ is_loading: false });
-        navigate('ScanShelf');
+        navigate('Home');
       })
       .catch(err => {
         this.setState({ is_loading: false });
@@ -237,7 +242,7 @@ const MainNavigator = createStackNavigator(
     ChangePassword: { screen: ChangePassword },
   },
   {
-    initialRouteName: 'ScanShelf',
+    initialRouteName: 'Home',
     defaultNavigationOptions: {
       headerStyle: {
         backgroundColor: '#8c1d1a',
