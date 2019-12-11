@@ -47,6 +47,7 @@ class ScanShelf extends Component {
     index: 0,
     books: [],
     scan_index: 0,
+    from_missing: false,
     routes: [
       { key: 'actual', title: 'Actual (0/0)' },
       { key: 'missing', title: 'Missing (0)' },
@@ -80,6 +81,7 @@ class ScanShelf extends Component {
       index: 0,
       scan_index: 0,
       current_scanned_index: 0,
+      from_missing: false,
       routes: [
         { key: 'actual', title: 'Actual (0/0)' },
         { key: 'missing', title: 'Missing (0)' },
@@ -92,8 +94,8 @@ class ScanShelf extends Component {
    * Reads database from local JSON file.
    */
   readJsonDbFile = async () => {
-    this.setState({ books: global.db });
     this.resetState();
+    this.setState({ books: global.db });
     this.inputClearAndFocus();
   };
 
@@ -204,7 +206,6 @@ class ScanShelf extends Component {
    */
   initialBookScan = () => {
     const { book_no, actual, books } = this.state;
-
     const scanned_book = books.find(book => {
       return book.barcode == book_no;
     });
@@ -236,7 +237,14 @@ class ScanShelf extends Component {
    * Scanning continues
    */
   scanBook = () => {
-    const { expected, actual, book_no, books, scan_index } = this.state;
+    const {
+      expected,
+      actual,
+      book_no,
+      books,
+      scan_index,
+      missing,
+    } = this.state;
 
     if (!book_no) {
       showToast('Please enter Book Number to scan');
@@ -253,6 +261,19 @@ class ScanShelf extends Component {
       if (already_scanned) {
         showToast('Book already scanned.');
         this.inputClearAndFocus();
+        return;
+      }
+
+      const missed_book = missing.find(book => {
+        return book.barcode == book_no;
+      });
+
+      if (missed_book) {
+        this.setState({
+          is_modal_visible: true,
+          can_continue: false,
+          from_missing: true,
+        });
         return;
       }
 
@@ -273,16 +294,19 @@ class ScanShelf extends Component {
           this.setState({
             is_modal_visible: true,
             can_continue: false,
+            from_missing: false,
           });
         } else if (index_diff > 1 && index_diff <= CONTINUE_GAP) {
           this.setState({
             is_modal_visible: true,
             can_continue: true,
+            from_missing: false,
           });
         } else if (index_diff > CONTINUE_GAP) {
           this.setState({
             is_modal_visible: true,
             can_continue: false,
+            from_missing: false,
           });
         } else {
           if (this.isExistInArray(expected_copy, scanned)) {
@@ -297,6 +321,7 @@ class ScanShelf extends Component {
             actual: actual_copy,
             scan_index: scanned_index,
             index: 0,
+            from_missing: false,
           });
 
           setTimeout(this.recordFound, 100);
@@ -374,13 +399,34 @@ class ScanShelf extends Component {
     } = this.state;
 
     const ActualView = () => (
-      <ListItem data={actual} navigation={this.props.navigation} />
+      <ListItem
+        data={actual}
+        onItemClick={() => {
+          setTimeout(() => {
+            this.inputClearAndFocus();
+          }, 800);
+        }}
+      />
     );
     const ExpectedView = () => (
-      <ListItem data={expected} navigation={this.props.navigation} />
+      <ListItem
+        data={expected}
+        onItemClick={() => {
+          setTimeout(() => {
+            this.inputClearAndFocus();
+          }, 800);
+        }}
+      />
     );
     const MissingView = () => (
-      <ListItem data={missing} navigation={this.props.navigation} />
+      <ListItem
+        data={missing}
+        onItemClick={() => {
+          setTimeout(() => {
+            this.inputClearAndFocus();
+          }, 800);
+        }}
+      />
     );
     const diff = current_scanned_index - (scan_index + 2);
     let book_title = '';
@@ -447,7 +493,12 @@ class ScanShelf extends Component {
             expected: ExpectedView,
             missing: MissingView,
           })}
-          onIndexChange={index => this.setState({ index })}
+          onIndexChange={index => {
+            this.setState({ index });
+            setTimeout(() => {
+              this.inputClearAndFocus();
+            }, 800);
+          }}
           initialLayout={{ width: Dimensions.get('window').width }}
         />
 
@@ -458,6 +509,12 @@ class ScanShelf extends Component {
                 {`Expected: ${book_title} (${book_call_number}) ${
                   diff ? `and ${diff} more` : ''
                 }.`}
+              </Text>
+            )}
+
+            {!can_continue && (
+              <Text style={GlobalStyles.modalTitle}>
+                Found in the missing bucket!!
               </Text>
             )}
 

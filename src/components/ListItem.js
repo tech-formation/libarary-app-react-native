@@ -1,42 +1,52 @@
-import React from 'react';
-import { View, FlatList, Text, StyleSheet } from 'react-native';
+import React, { Component } from 'react';
+import {
+  View,
+  FlatList,
+  Text,
+  StyleSheet,
+  TouchableWithoutFeedback,
+} from 'react-native';
 
 export const truncate = input =>
   input.length > 45 ? `${input.substring(0, 45)}...` : input;
 
-const ListItem = ({ data }) => {
-  return (
-    <View style={[styles.scene]}>
-      <FlatList
-        data={data}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View key={item.book_id} style={styles.listItem}>
-            <Text style={styles.listItemTitle}>{truncate(item.title)}</Text>
-            <View style={[styles.listItemDetails, styles.inlineFlow]}>
-              <View style={styles.inlineFlow}>
-                <Text style={styles.listItemLabel}>By:&nbsp;</Text>
-                <Text style={styles.listItemText}>{item.author}</Text>
+class ListItem extends Component {
+  render() {
+    return (
+      <View style={[styles.scene]}>
+        <TouchableWithoutFeedback onPress={() => this.props.onItemClick()}>
+          <FlatList
+            data={this.props.data}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <View key={item.book_id} style={styles.listItem}>
+                <Text style={styles.listItemTitle}>{truncate(item.title)}</Text>
+                <View style={[styles.listItemDetails, styles.inlineFlow]}>
+                  <View style={styles.inlineFlow}>
+                    <Text style={styles.listItemLabel}>By:&nbsp;</Text>
+                    <Text style={styles.listItemText}>{item.author}</Text>
+                  </View>
+                  <View style={styles.inlineFlow}>
+                    <Text style={[styles.listItemLabel, styles.leftPadding20]}>
+                      Staff Note:&nbsp;
+                    </Text>
+                    <Text style={styles.listItemText}>{item.staff_note}</Text>
+                  </View>
+                </View>
+                <View style={[styles.listItemDetails, styles.inlineFlow]}>
+                  <View style={styles.inlineFlow}>
+                    <Text style={[styles.listItemLabel]}>Call No:&nbsp;</Text>
+                    <Text style={styles.listItemText}>{item.call_number}</Text>
+                  </View>
+                </View>
               </View>
-              <View style={styles.inlineFlow}>
-                <Text style={[styles.listItemLabel, styles.leftPadding20]}>
-                  Staff Note:&nbsp;
-                </Text>
-                <Text style={styles.listItemText}>{item.staff_note}</Text>
-              </View>
-            </View>
-            <View style={[styles.listItemDetails, styles.inlineFlow]}>
-              <View style={styles.inlineFlow}>
-                <Text style={[styles.listItemLabel]}>Call No:&nbsp;</Text>
-                <Text style={styles.listItemText}>{item.call_number}</Text>
-              </View>
-            </View>
-          </View>
-        )}
-      />
-    </View>
-  );
-};
+            )}
+          />
+        </TouchableWithoutFeedback>
+      </View>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   scene: {

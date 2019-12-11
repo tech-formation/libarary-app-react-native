@@ -65,8 +65,8 @@ class Login extends Component {
   saveDb = async db => {
     try {
       var path = RNFS.DocumentDirectoryPath + '/library_db.json';
-      global.db = JSON.stringify(db);
-      await RNFS.writeFile(path, global.db, 'utf8')
+      global.db = db;
+      await RNFS.writeFile(path, JSON.stringify(db), 'utf8')
         .then(success => {
           showToast('Synced Successffuly');
         })

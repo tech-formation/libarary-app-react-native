@@ -80,6 +80,7 @@ export default StyleSheet.create({
   modalTitle: {
     width: '80%',
     marginVertical: 10,
+    textAlign: 'center',
   },
   select: {
     width: 200,
