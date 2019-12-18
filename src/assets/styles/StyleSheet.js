@@ -1,6 +1,10 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+  flexCenter: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   mainContainer: {
     flex: 1,
     flexDirection: 'row',
@@ -9,13 +13,13 @@ export default StyleSheet.create({
     backgroundColor: '#fff',
   },
   contentContainer: {
-    width: 300,
-    height: 500,
+    width: '75%',
+    justifyContent: 'center',
   },
   logoContainer: {
-    flex: 0.2,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 20,
   },
   logoImage: {
     width: 100,
@@ -44,12 +48,39 @@ export default StyleSheet.create({
   },
   button: {
     backgroundColor: '#8c1d1a',
-    width: 300,
+    width: '85%',
     height: 40,
     top: 30,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+    marginVertical: 10,
+  },
+  simpleButton: {
+    backgroundColor: '#8c1d1a',
+    width: '85%',
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  confirmaitonModal: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    height: 250,
+    width: '80%',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+    paddingVertical: 15,
+  },
+  modalTitle: {
+    width: '80%',
+    marginVertical: 10,
+    textAlign: 'center',
   },
   select: {
     width: 200,

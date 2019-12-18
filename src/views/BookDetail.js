@@ -11,8 +11,8 @@ import GlobalStyles from '../assets/styles/StyleSheet';
 import { Icon } from 'react-native-elements';
 import HeaderMenu from '../components/HeaderMenu';
 import Spinner from 'react-native-loading-spinner-overlay';
-import RNFS from 'react-native-fs';
 import { showToast } from '../utils/helper';
+import { NavigationEvents } from 'react-navigation';
 
 export default class BookDetail extends Component {
   constructor(props) {
@@ -23,7 +23,6 @@ export default class BookDetail extends Component {
   state = {
     is_loading: false,
     book_no: '',
-    token: '',
     books: [],
     book: {},
   };
@@ -32,7 +31,7 @@ export default class BookDetail extends Component {
     const { navigate } = navigation;
 
     return {
-      title: 'Details',
+      title: 'Scan Book',
       headerRight: (
         <View style={GlobalStyles.headerRightContainer}>
           <HeaderMenu navigate={navigate} />
@@ -41,33 +40,8 @@ export default class BookDetail extends Component {
     };
   };
 
-  componentDidMount() {
-    this.getDb();
-  }
-
-  getDb = async () => {
-    const { navigate } = this.props.navigation;
-    try {
-      let db = null;
-      var path = RNFS.DocumentDirectoryPath + '/library_db.json';
-
-      await RNFS.readFile(path)
-        .then(result => {
-          db = result;
-        })
-        .catch(err => {
-          console.log(err.message, err.code);
-        });
-
-      if (db != null) {
-        const { books } = JSON.parse(db);
-        this.setState({ books });
-      } else {
-        navigate('Login');
-      }
-    } catch (e) {
-      // showToast(e);
-    }
+  onLoad = () => {
+    this.setState({ books: global.db });
   };
 
   /**
@@ -102,6 +76,8 @@ export default class BookDetail extends Component {
 
     return (
       <>
+        <NavigationEvents onWillFocus={this.onLoad} />
+
         <Spinner visible={is_loading} color="#8c1d1a" />
 
         <View style={styles.mainContainer}>
@@ -145,7 +121,7 @@ export default class BookDetail extends Component {
                   </Text>
                 </View>
               </View>
-              <View style={styles.detailMidRow}>
+              {/* <View style={styles.detailMidRow}>
                 <Text style={styles.bookSubTitle}>
                   Staff Note: {book.staff_note}
                 </Text>
@@ -163,7 +139,7 @@ export default class BookDetail extends Component {
                 <Text style={[styles.bookSubTitle, styles.paddingLeft10]}>
                   BIB: {book.bib_id}
                 </Text>
-              </View>
+              </View> */}
               <View style={styles.detailMidRow}>
                 <Text style={styles.bookSubTitle}>
                   Call No.: {book.call_number}
@@ -201,9 +177,9 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   detailsTopRow: {
-    flex: 0.15,
     flexDirection: 'row',
     paddingTop: 10,
+    marginBottom: 20,
   },
   detailImageContainer: {
     flex: 0.3,
@@ -228,7 +204,6 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   detailMidRow: {
-    flex: 0.04,
     flexDirection: 'row',
     justifyContent: 'center',
     paddingTop: 5,
