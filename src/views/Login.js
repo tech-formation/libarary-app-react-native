@@ -37,6 +37,11 @@ import RNFS from 'react-native-fs';
 // };
 
 class Login extends Component {
+  constructor() {
+    super();
+    global.db = [];
+  }
+
   static navigationOptions = { header: null };
 
   /**
@@ -45,6 +50,7 @@ class Login extends Component {
   state = {
     is_loading: false,
     username: 'admin',
+    loading_text: '',
     password: '53cret!@#$',
   };
 
@@ -59,7 +65,7 @@ class Login extends Component {
   saveDb = async db => {
     try {
       var path = RNFS.DocumentDirectoryPath + '/library_db.json';
-
+      global.db = db;
       await RNFS.writeFile(path, JSON.stringify(db), 'utf8')
         .then(success => {
           showToast('Synced Successffuly');
@@ -101,7 +107,7 @@ class Login extends Component {
   };
 
   syncData = token => {
-    this.setState({ is_loading: true });
+    this.setState({ is_loading: true, loading_text: 'Syncing...' });
     const { navigate } = this.props.navigation;
     httpGet(SYNC_DATA, {
       headers: {
@@ -110,21 +116,27 @@ class Login extends Component {
     })
       .then(res => {
         this.saveDb(res);
-        this.setState({ is_loading: false });
+        this.setState({ is_loading: false, loading_text: '' });
         navigate('Home');
       })
       .catch(err => {
-        this.setState({ is_loading: false });
+        this.setState({ is_loading: false, loading_text: '' });
         setTimeout(() => showToast(err), 200);
       });
   };
 
   render() {
-    const { username, password, is_loading } = this.state;
+    const { username, password, is_loading, loading_text } = this.state;
 
     return (
       <>
-        <Spinner visible={is_loading} color="#8c1d1a" />
+        <Spinner
+          overlayColor="rgba(0, 0, 0, 0.60)"
+          textStyle={{ color: '#fff' }}
+          textContent={loading_text}
+          visible={is_loading}
+          color="#8c1d1a"
+        />
 
         <View style={GlobalStyles.mainContainer}>
           <View style={GlobalStyles.contentContainer}>

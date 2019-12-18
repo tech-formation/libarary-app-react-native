@@ -6,51 +6,62 @@ import {
   TextInput,
   StyleSheet,
   Dimensions,
-  Alert,
 } from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import GlobalStyles from '../assets/styles/StyleSheet';
-import { httpGet } from '../utils/http';
-import { SCAN_SHELF_URL } from '../configs/constants';
 import { Icon } from 'react-native-elements';
 import ListItem from '../components/ListItem';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { showToast } from '../utils/helper';
-import AsyncStorage from '@react-native-community/async-storage';
 import HeaderMenu from '../components/HeaderMenu';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
+import { NavigationEvents } from 'react-navigation';
+import Modal from 'react-native-modal';
+
+const CONTINUE_GAP = 20;
+const LOAD_CHUNK = 2000;
 
 class ScanShelf extends Component {
+  /**
+   * Constructor
+   * @param {Object} props
+   */
   constructor(props) {
     super(props);
     this.input = React.createRef();
   }
+
+  /**
+   * State
+   */
   state = {
     is_loading: false,
-    token: '',
+    is_modal_visible: false,
+    can_continue: true,
     book_no: '',
+    current_scanned_index: 0,
+    expected: [],
     missing: [],
     actual: [],
-    extra: [],
     index: 0,
-    db: {
-      languages: [],
-      books: [],
-      sides: [],
-      racks: [],
-    },
+    books: [],
+    scan_index: 0,
+    from_missing: false,
     routes: [
       { key: 'actual', title: 'Actual (0/0)' },
-      { key: 'extra', title: 'Extra (0)' },
       { key: 'missing', title: 'Missing (0)' },
+      { key: 'expected', title: 'Expected (0)' },
     ],
   };
 
+  /**
+   * Static Header Options
+   */
   static navigationOptions = ({ navigation }) => {
     const { navigate } = navigation;
     return {
-      title: 'History',
+      title: 'Scan Rack',
       headerRight: (
         <View style={GlobalStyles.headerRightContainer}>
           <HeaderMenu navigate={navigate} />
@@ -59,56 +70,64 @@ class ScanShelf extends Component {
     };
   };
 
-  componentDidMount() {
-    this.getToken();
-    this.getDb();
-  }
+  /**
+   * Reset state
+   */
+  resetState = () => {
+    this.setState({
+      expected: [],
+      actual: [],
+      missing: [],
+      index: 0,
+      scan_index: 0,
+      current_scanned_index: 0,
+      from_missing: false,
+      routes: [
+        { key: 'actual', title: 'Actual (0/0)' },
+        { key: 'missing', title: 'Missing (0)' },
+        { key: 'expected', title: 'Expected (0)' },
+      ],
+    });
+  };
+
+  /**
+   * Reads database from local JSON file.
+   */
+  readJsonDbFile = async () => {
+    this.resetState();
+    this.setState({ books: global.db });
+    this.inputClearAndFocus();
+  };
 
   getDb = async () => {
+    this.setState({ is_loading: true });
     const { navigate } = this.props.navigation;
 
-    this.setState({ is_loading: true });
-
-    try {
-      let db = null;
+    if (!global.db) {
       var path = RNFS.DocumentDirectoryPath + '/library_db.json';
-
+      global.db = [];
       await RNFS.readFile(path)
-        .then(result => {
-          db = result;
+        .then(data => {
+          global.db = JSON.parse(data);
         })
         .catch(err => {
           console.log(err.message, err.code);
         });
-
-      if (db != null) {
-        this.setState({ db: JSON.parse(db), is_loading: false });
-        const { books } = JSON.parse(db);
-
-        const { navigation } = this.props;
-        const lang = navigation.getParam('lang');
-        const rack = navigation.getParam('rack');
-        const side = navigation.getParam('side');
-        const shelf_data = books.filter(
-          book =>
-            book.language_id == lang &&
-            book.rack_id == rack &&
-            book.side_id == side
-        );
-
-        this.setState({ missing: shelf_data, index: 2 });
-
-        setTimeout(() => {
-          this.updateTabs();
-          this.setState({ is_loading: false });
-        }, 100);
-        this.input.focus();
-      } else {
-        navigate('Login');
-      }
-    } catch (e) {
-      // showToast(e);
     }
+
+    this.readJsonDbFile();
+    this.setState({ is_loading: false });
+
+    if (!global.db) {
+      navigate('Login');
+    }
+  };
+
+  /**
+   * For handling exceptions
+   */
+  handleError = err => {
+    console.log(err.message, err.code);
   };
 
   /**
@@ -118,20 +137,6 @@ class ScanShelf extends Component {
     const sound = new Sound(`${name}.mp3`, null, error => {
       sound.play(() => sound.release());
     });
-  };
-
-  getToken = async () => {
-    const { navigate } = this.props.navigation;
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (token != null) {
-        this.setState({ token });
-      } else {
-        navigate('Login');
-      }
-    } catch (e) {
-      // showToast(e);
-    }
   };
 
   /**
@@ -144,156 +149,299 @@ class ScanShelf extends Component {
   };
 
   /**
-   * Scan Book & Adjust the Tabs
+   * Record not found actions
    */
-  scanBook = book_no => {
-    if (!book_no) Alert.alert('Please enter Book Number to scan');
-
-    const {
-      missing,
-      actual,
-      extra,
-      db: { books },
-    } = this.state;
-
-    const scanned = [...missing, ...actual].find(book => {
-      return book.barcode == book_no;
-    });
-
-    if (scanned) {
-      const missing_copy = [...missing];
-      if (this.isExistInArray(missing_copy, scanned)) {
-        missing_copy.splice(missing.indexOf(scanned), 1);
-      }
-
-      const actual_copy = [...actual];
-      if (!this.isExistInArray(actual_copy, scanned)) actual_copy.push(scanned);
-
-      this.setState({ missing: missing_copy, actual: actual_copy, index: 0 });
-
-      setTimeout(() => {
-        this.updateTabs();
-        this.input.clear();
-        this.input.focus();
-        this.playSound('found');
-      }, 100);
-    } else {
-      const extra_book = books.find(book => {
-        return book.barcode == book_no;
-      });
-
-      if (extra_book) {
-        const extra_copy = [...extra];
-        extra_copy.push(extra_book);
-        this.setState({ extra: extra_copy, index: 1 });
-        setTimeout(() => {
-          this.updateTabs();
-          this.playSound('not_found');
-          this.input.clear();
-          this.input.focus();
-        }, 100);
-      } else {
-        this.input.clear();
-        this.input.focus();
-        this.playSound('not_found');
-        showToast('Record not found');
-      }
-
-      // let url = FETCH_BOOK_URL;
-      // url = url.replace(/#ID#/g, book_no);
-      // this.setState({ is_loading: true });
-      // httpGet(url, {
-      //   headers: {
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      // })
-      //   .then(res => {
-      //     const { data } = res;
-      //     const extra_copy = [...extra];
-      //     if (!this.isExistInArray(extra_copy, data)) extra_copy.push(data);
-      //     this.setState({ extra: extra_copy, index: 1 });
-      //     setTimeout(() => {
-      //       this.updateTabs();
-      //       this.setState({ is_loading: false });
-      //       this.playSound('not_found');
-      //       this.input.clear();
-      //       this.input.focus();
-      //     }, 100);
-      //   })
-      //   .catch(err => {
-      //     this.setState({ is_loading: false });
-      //     setTimeout(() => showToast(err), 200);
-      //     this.input.focus();
-      //     this.playSound('not_found');
-      //   });
-    }
+  recordNotFound = () => {
+    this.inputClearAndFocus();
+    this.playSound('not_found');
+    showToast('Record not found');
   };
 
   /**
-   * Scan Shelf
+   * Record found actions
    */
-  scanShelf = shelf_no => {
-    let url = SCAN_SHELF_URL;
-    url = url.replace(/#ID#/g, shelf_no);
-    this.setState({ is_loading: true });
-    httpGet(url, {
-      headers: {
-        Authorization: `Bearer ${this.state.token}`,
-      },
-    })
-      .then(res => {
-        const {
-          data: {
-            books: { data },
-          },
-        } = res;
-
-        this.setState({ missing: data });
-
-        setTimeout(() => {
-          this.updateTabs();
-          this.setState({ is_loading: false, index: 2 });
-        }, 200);
-      })
-      .catch(err => {
-        this.setState({ is_loading: false });
-        setTimeout(() => showToast(err), 100);
-      });
+  recordFound = () => {
+    this.updateTabs();
+    this.inputClearAndFocus();
+    this.playSound('found');
   };
 
   /**
-   * Updates Tabs
+   * Clears the input and back focus
+   */
+  inputClearAndFocus = () => {
+    this.input.clear();
+    this.input.focus();
+    this.setState({ book_no: '' });
+  };
+
+  /**
+   * Updates Tabs text and counter as per data
    */
   updateTabs = () => {
-    const { actual, extra, missing, routes } = this.state;
+    const { actual, expected, routes, missing } = this.state;
     const routes_copy = [...routes];
 
     const new_routes = routes_copy.map(tab => {
       if (tab.key == 'actual') {
-        tab.title = `Actual (${actual.length}/${missing.length})`;
-      }
-
-      if (tab.key == 'extra') {
-        tab.title = `Extra (${extra.length})`;
+        tab.title = `Actual (${actual.length}/${expected.length})`;
       }
 
       if (tab.key == 'missing') {
         tab.title = `Missing (${missing.length})`;
       }
+
+      if (tab.key == 'expected') {
+        tab.title = `Expected (${expected.length})`;
+      }
+
       return tab;
     });
 
     this.setState({ routes: new_routes });
   };
 
+  /**
+   * Initial Scanning
+   */
+  initialBookScan = () => {
+    const { book_no, actual, books } = this.state;
+    const scanned_book = books.find(book => {
+      return book.barcode == book_no;
+    });
+
+    if (scanned_book) {
+      const scanned_index = books.indexOf(scanned_book);
+      const book_load = books.slice(scanned_index, LOAD_CHUNK);
+      book_load.splice(scanned_index, 1);
+
+      const actual_copy = [...actual];
+      if (!this.isExistInArray(actual_copy, scanned_book)) {
+        actual_copy.unshift(scanned_book);
+      }
+
+      this.setState({
+        expected: book_load,
+        actual: actual_copy,
+        index: 0,
+        scan_index: scanned_index,
+      });
+
+      setTimeout(this.recordFound, 100);
+    } else {
+      this.recordNotFound();
+    }
+  };
+
+  /**
+   * Scanning continues
+   */
+  scanBook = () => {
+    const {
+      expected,
+      actual,
+      book_no,
+      books,
+      scan_index,
+      missing,
+    } = this.state;
+
+    if (!book_no) {
+      showToast('Please enter Book Number to scan');
+      return;
+    }
+
+    if (expected.length == 0) {
+      this.initialBookScan();
+    } else {
+      const already_scanned = actual.find(book => {
+        return book.barcode == book_no;
+      });
+
+      if (already_scanned) {
+        showToast('Book already scanned.');
+        this.inputClearAndFocus();
+        return;
+      }
+
+      const missed_book = missing.find(book => {
+        return book.barcode == book_no;
+      });
+
+      if (missed_book) {
+        this.setState({
+          is_modal_visible: true,
+          can_continue: false,
+          from_missing: true,
+        });
+        return;
+      }
+
+      const scanned = expected.find(book => {
+        return book.barcode == book_no;
+      });
+
+      if (scanned) {
+        const expected_copy = [...expected];
+        const scanned_index = books.indexOf(scanned);
+        const index_diff = scanned_index - scan_index;
+
+        this.setState({
+          current_scanned_index: scanned_index,
+        });
+
+        if (index_diff <= 0) {
+          this.setState({
+            is_modal_visible: true,
+            can_continue: false,
+            from_missing: false,
+          });
+        } else if (index_diff > 1 && index_diff <= CONTINUE_GAP) {
+          this.setState({
+            is_modal_visible: true,
+            can_continue: true,
+            from_missing: false,
+          });
+        } else if (index_diff > CONTINUE_GAP) {
+          this.setState({
+            is_modal_visible: true,
+            can_continue: false,
+            from_missing: false,
+          });
+        } else {
+          if (this.isExistInArray(expected_copy, scanned)) {
+            expected_copy.splice(expected.indexOf(scanned), 1);
+          }
+
+          const actual_copy = [...actual];
+          actual_copy.unshift(scanned);
+
+          this.setState({
+            expected: expected_copy,
+            actual: actual_copy,
+            scan_index: scanned_index,
+            index: 0,
+            from_missing: false,
+          });
+
+          setTimeout(this.recordFound, 100);
+        }
+      } else {
+        this.recordNotFound();
+      }
+    }
+  };
+
+  /**
+   * When user click on Out from Modal
+   */
+  onOut = () => {
+    this.setState({ is_modal_visible: false });
+    this.inputClearAndFocus();
+    showToast('Out Successfully');
+  };
+
+  /**
+   * When user click on continue from Modal
+   */
+  onContinue = () => {
+    const {
+      current_scanned_index,
+      books,
+      expected,
+      actual,
+      scan_index,
+      missing,
+    } = this.state;
+
+    this.setState({
+      is_modal_visible: false,
+    });
+
+    const expected_copy = [...expected];
+    let missing_copy = [...missing];
+    const scanned = books[current_scanned_index];
+    const diff = current_scanned_index - scan_index;
+
+    if (this.isExistInArray(expected_copy, scanned)) {
+      expected_copy.splice(expected.indexOf(scanned), 1);
+    }
+
+    const missed = expected_copy.splice(0, diff - 1);
+
+    missing_copy = [...missing_copy, ...missed];
+
+    const actual_copy = [...actual];
+    actual_copy.unshift(scanned);
+
+    this.setState({
+      scan_index: current_scanned_index,
+      expected: expected_copy,
+      actual: actual_copy,
+      missing: missing_copy,
+      index: 0,
+    });
+
+    setTimeout(this.recordFound, 100);
+  };
+
   render() {
-    const { book_no, missing, actual, extra, is_loading } = this.state;
-    const ActualView = () => <ListItem data={actual} />;
-    const ExtraView = () => <ListItem data={extra} />;
-    const MissingView = () => <ListItem data={missing} />;
+    const {
+      book_no,
+      expected,
+      missing,
+      actual,
+      is_loading,
+      is_modal_visible,
+      current_scanned_index,
+      scan_index,
+      can_continue,
+    } = this.state;
+
+    const ActualView = () => (
+      <ListItem
+        data={actual}
+        onItemClick={() => {
+          setTimeout(() => {
+            this.inputClearAndFocus();
+          }, 800);
+        }}
+      />
+    );
+    const ExpectedView = () => (
+      <ListItem
+        data={expected}
+        onItemClick={() => {
+          setTimeout(() => {
+            this.inputClearAndFocus();
+          }, 800);
+        }}
+      />
+    );
+    const MissingView = () => (
+      <ListItem
+        data={missing}
+        onItemClick={() => {
+          setTimeout(() => {
+            this.inputClearAndFocus();
+          }, 800);
+        }}
+      />
+    );
+    const diff = current_scanned_index - (scan_index + 2);
+    let book_title = '';
+    let book_call_number = '';
+
+    if (expected.length) {
+      const { title, call_number } = expected[0];
+      book_title = title;
+      book_call_number = call_number;
+    }
 
     return (
       <>
+        <NavigationEvents onWillFocus={this.getDb} />
+
         <Spinner visible={is_loading} color="#8c1d1a" />
 
         <View style={[GlobalStyles.inputContainer, styles.inputContainer]}>
@@ -312,9 +460,9 @@ class ScanShelf extends Component {
             keyboardType="numeric"
             underlineColorAndroid="transparent"
             style={[styles.textInput]}
-            onSubmitEditing={event => this.scanBook(event.nativeEvent.text)}
+            onSubmitEditing={this.scanBook}
           />
-          <TouchableOpacity onPress={() => this.scanBook(book_no)}>
+          <TouchableOpacity onPress={this.scanBook}>
             <Icon name="send" color="#8c1d1a" />
           </TouchableOpacity>
         </View>
@@ -342,12 +490,55 @@ class ScanShelf extends Component {
           )}
           renderScene={SceneMap({
             actual: ActualView,
-            extra: ExtraView,
+            expected: ExpectedView,
             missing: MissingView,
           })}
-          onIndexChange={index => this.setState({ index })}
+          onIndexChange={index => {
+            this.setState({ index });
+            setTimeout(() => {
+              this.inputClearAndFocus();
+            }, 800);
+          }}
           initialLayout={{ width: Dimensions.get('window').width }}
         />
+
+        <Modal style={GlobalStyles.flexCenter} isVisible={is_modal_visible}>
+          <View style={GlobalStyles.confirmaitonModal}>
+            {can_continue && (
+              <Text style={GlobalStyles.modalTitle}>
+                {`Expected: ${book_title} (${book_call_number}) ${
+                  diff ? `and ${diff} more` : ''
+                }.`}
+              </Text>
+            )}
+
+            {!can_continue && (
+              <Text style={GlobalStyles.modalTitle}>
+                Found in the missing bucket!!
+              </Text>
+            )}
+
+            <TouchableOpacity
+              onPress={this.onOut}
+              style={GlobalStyles.simpleButton}
+            >
+              <View>
+                <Text style={GlobalStyles.buttonText}>OUT</Text>
+              </View>
+            </TouchableOpacity>
+
+            {can_continue && (
+              <TouchableOpacity
+                onPress={this.onContinue}
+                style={GlobalStyles.simpleButton}
+              >
+                <View>
+                  <Text style={GlobalStyles.buttonText}>CONTINUE</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
+        </Modal>
       </>
     );
   }
